@@ -1,0 +1,853 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Horarios{% endblock %}
+
+{% block content %}
+<style>
+/* Estilos para la gestión dinámica de horarios */
+.day-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    min-height: 80px;
+}
+
+.day-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+}
+
+.day-card.selected {
+    border-color: #3b82f6;
+    background-color: #dbeafe;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.day-card.configured {
+    border-color: #10b981;
+    background-color: #ecfdf5;
+}
+
+.day-card.has-changes {
+    border-color: #f59e0b;
+    background-color: #fffbeb;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    50% { 
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+    }
+}
+
+.day-card.selected.configured {
+    border-color: #3b82f6;
+    background-color: #dbeafe;
+}
+
+.schedule-container {
+    height: 400px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.time-input {
+    transition: all 0.2s ease;
+}
+
+.time-input:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.save-button {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    transition: all 0.3s ease;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.save-button.bg-yellow-500 {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.save-button.bg-green-500 {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.save-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+</style>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>
+                Gestión de Horarios de Atención
+            </h1>
+            <p class="text-gray-600">Configura y actualiza tus horarios de atención para cada día de la semana</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- COLUMNA IZQUIERDA: DÍAS DE LA SEMANA -->
+            <div class="bg-white rounded-3xl shadow-lg p-6">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center">
+                        <i class="fas fa-calendar-week text-blue-600 mr-2"></i>
+                        Días de la Semana
+                    </h3>
+                    <p class="text-gray-600">Selecciona un día para configurar su horario</p>
+                </div>
+
+                <div class="schedule-container">
+                    <div class="space-y-3">
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="lunes"
+                             onclick="selectDay('lunes', 'Lunes')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Lunes</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-lunes">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-lunes"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-lunes">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="martes"
+                             onclick="selectDay('martes', 'Martes')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Martes</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-martes">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-martes"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-martes">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="miércoles"
+                             onclick="selectDay('miércoles', 'Miércoles')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Miércoles</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-miércoles">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-miércoles"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-miércoles">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="jueves"
+                             onclick="selectDay('jueves', 'Jueves')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Jueves</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-jueves">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-jueves"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-jueves">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="viernes"
+                             onclick="selectDay('viernes', 'Viernes')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Viernes</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-viernes">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-viernes"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-viernes">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="sábado"
+                             onclick="selectDay('sábado', 'Sábado')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Sábado</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-sábado">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-sábado"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-sábado">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="day-card p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 cursor-pointer"
+                             data-day="domingo"
+                             onclick="selectDay('domingo', 'Domingo')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-day text-2xl mr-3 text-blue-600"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Domingo</h4>
+                                        <p class="text-sm text-gray-500" id="day-status-domingo">Sin configurar</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <i class="fas fa-circle text-gray-400" id="day-icon-domingo"></i>
+                                    <div class="text-xs text-gray-500 mt-1" id="day-time-domingo">--:-- - --:--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: CONFIGURACIÓN DE HORARIO -->
+            <div class="bg-white rounded-3xl shadow-lg p-6">
+                <!-- Estado inicial: sin selección -->
+                <div id="no-selection" class="text-center py-16">
+                    <i class="fas fa-clock text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Selecciona un día</h3>
+                    <p class="text-gray-500">Elige un día de la semana para configurar su horario de atención</p>
+                </div>
+
+                <!-- Formulario de horario -->
+                <div id="schedule-form" class="hidden">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-clock text-blue-600 mr-2"></i>
+                            Configurar Horario
+                        </h3>
+                        <p class="text-gray-600">Día: <span id="selected-day-name" class="font-semibold text-blue-600"></span></p>
+                    </div>
+
+                    <form id="horario-form" class="space-y-6">
+                        {% csrf_token %}
+                        <input type="hidden" id="selected-day" name="dia_semana" value="">
+
+                        <!-- Horario Principal -->
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-business-time text-blue-600 mr-2"></i>
+                                Horario Principal
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Hora de Inicio *
+                                    </label>
+                                    <input type="time" 
+                                           id="hora_inicio" 
+                                           name="hora_inicio" 
+                                           class="time-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Hora de Fin *
+                                    </label>
+                                    <input type="time" 
+                                           id="hora_fin" 
+                                           name="hora_fin" 
+                                           class="time-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Intervalo de Descanso -->
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-coffee text-yellow-600 mr-2"></i>
+                                Intervalo de Descanso (Opcional)
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Descanso Desde
+                                    </label>
+                                    <input type="time" 
+                                           id="intervalo_desde" 
+                                           name="intervalo_desde" 
+                                           class="time-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                                    <p class="text-xs text-gray-500 mt-1">Ej: 12:00 (inicio del almuerzo)</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Descanso Hasta
+                                    </label>
+                                    <input type="time" 
+                                           id="intervalo_hasta" 
+                                           name="intervalo_hasta" 
+                                           class="time-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                                    <p class="text-xs text-gray-500 mt-1">Ej: 13:00 (fin del almuerzo)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="flex justify-end space-x-3 pt-6 border-t">
+                            <button type="button" 
+                                    onclick="clearCurrentDay()" 
+                                    class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                                <i class="fas fa-trash mr-2"></i>
+                                Limpiar Día
+                            </button>
+                            <button type="button" 
+                                    onclick="saveCurrentDay()" 
+                                    class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                                <i class="fas fa-save mr-2"></i>
+                                Guardar Día
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÓN GUARDAR TODOS LOS CAMBIOS -->
+        <div class="text-center mt-8">
+            <button id="save-all-btn" 
+                    onclick="saveAllSchedules()" 
+                    class="save-button text-white px-12 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center mx-auto">
+                <i class="fas fa-check-circle mr-3 text-2xl"></i>
+                Guardar Todos los Horarios
+            </button>
+            <p class="text-gray-600 mt-3">
+                <span id="changes-count">0</span> días configurados
+                <span id="changes-indicator" class="hidden ml-2 text-yellow-600">
+                    • <span id="pending-changes">0</span> cambios pendientes
+                </span>
+            </p>
+        </div>
+
+        <!-- BOTÓN VOLVER -->
+        <div class="text-center mt-6">
+            <a href="{% url 'doctor:horario_list' %}" 
+               class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg transition-colors duration-200 inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Volver al Listado
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+let currentDay = null;
+let scheduleChanges = new Map(); // Almacenar cambios temporales
+let originalSchedules = new Map(); // Horarios originales del servidor
+
+// Días de la semana
+const daysData = {
+    'lunes': 'Lunes',
+    'martes': 'Martes',
+    'miércoles': 'Miércoles',
+    'jueves': 'Jueves',
+    'viernes': 'Viernes',
+    'sábado': 'Sábado',
+    'domingo': 'Domingo'
+};
+
+// Función para seleccionar un día
+function selectDay(dayCode, dayName) {
+    // Guardar cambios del día anterior si hay alguno
+    if (currentDay && hasUnsavedChanges()) {
+        if (!confirm('¿Deseas guardar los cambios del día anterior?')) {
+            // Si no quiere guardar, revertir cambios
+            loadDaySchedule(currentDay);
+        } else {
+            saveCurrentDay();
+        }
+    }
+    
+    currentDay = dayCode;
+    
+    // Actualizar UI
+    document.querySelectorAll('.day-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const selectedCard = document.querySelector(`[data-day="${dayCode}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    
+    // Mostrar formulario
+    document.getElementById('no-selection').classList.add('hidden');
+    document.getElementById('schedule-form').classList.remove('hidden');
+    document.getElementById('selected-day-name').textContent = dayName;
+    document.getElementById('selected-day').value = dayCode;
+    
+    // Cargar horario existente
+    loadDaySchedule(dayCode);
+}
+
+// Función para cargar horario de un día
+function loadDaySchedule(dayCode) {
+    // Primero verificar si hay cambios temporales
+    if (scheduleChanges.has(dayCode)) {
+        const schedule = scheduleChanges.get(dayCode);
+        populateForm(schedule);
+        return;
+    }
+    
+    // Si no hay cambios temporales, cargar desde servidor
+    fetch(`/doctor/horario/ajax/day/${dayCode}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateForm(data.schedule);
+                // Guardar como original
+                originalSchedules.set(dayCode, data.schedule);
+            } else {
+                // Día sin configurar
+                clearForm();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading schedule:', error);
+            clearForm();
+        });
+}
+
+// Función para llenar el formulario
+function populateForm(schedule) {
+    document.getElementById('hora_inicio').value = schedule.hora_inicio || '';
+    document.getElementById('hora_fin').value = schedule.hora_fin || '';
+    document.getElementById('intervalo_desde').value = schedule.intervalo_desde || '';
+    document.getElementById('intervalo_hasta').value = schedule.intervalo_hasta || '';
+}
+
+// Función para limpiar el formulario
+function clearForm() {
+    document.getElementById('hora_inicio').value = '';
+    document.getElementById('hora_fin').value = '';
+    document.getElementById('intervalo_desde').value = '';
+    document.getElementById('intervalo_hasta').value = '';
+}
+
+// Función para verificar si hay cambios sin guardar
+function hasUnsavedChanges() {
+    if (!currentDay) return false;
+    
+    const currentFormData = getFormData();
+    const originalData = originalSchedules.get(currentDay);
+    
+    // Si hay cambios temporales, comparar con esos cambios
+    if (scheduleChanges.has(currentDay)) {
+        const tempData = scheduleChanges.get(currentDay);
+        return JSON.stringify(currentFormData) !== JSON.stringify(tempData);
+    }
+    
+    // Si no hay datos originales, verificar si el formulario tiene datos
+    if (!originalData) {
+        return currentFormData.hora_inicio || currentFormData.hora_fin || 
+               currentFormData.intervalo_desde || currentFormData.intervalo_hasta;
+    }
+    
+    // Comparar con datos originales
+    return JSON.stringify(currentFormData) !== JSON.stringify(originalData);
+}
+
+// Función para obtener datos del formulario
+function getFormData() {
+    return {
+        hora_inicio: document.getElementById('hora_inicio').value,
+        hora_fin: document.getElementById('hora_fin').value,
+        intervalo_desde: document.getElementById('intervalo_desde').value,
+        intervalo_hasta: document.getElementById('intervalo_hasta').value
+    };
+}
+
+// Función para guardar el día actual
+function saveCurrentDay() {
+    if (!currentDay) {
+        showNotification('No hay día seleccionado', 'warning');
+        return;
+    }
+    
+    const formData = getFormData();
+    
+    // Validar datos básicos
+    if (!formData.hora_inicio || !formData.hora_fin) {
+        showNotification('Debe especificar al menos la hora de inicio y fin', 'error');
+        return;
+    }
+    
+    // Validar que hora_fin sea posterior a hora_inicio
+    if (formData.hora_inicio >= formData.hora_fin) {
+        showNotification('La hora de fin debe ser posterior a la hora de inicio', 'error');
+        return;
+    }
+    
+    // Validar intervalo si está presente
+    if (formData.intervalo_desde && formData.intervalo_hasta) {
+        if (formData.intervalo_desde >= formData.intervalo_hasta) {
+            showNotification('El intervalo de descanso no es válido', 'error');
+            return;
+        }
+    }
+    
+    // Guardar cambios temporalmente
+    scheduleChanges.set(currentDay, formData);
+    
+    // Actualizar UI del día
+    updateDayCard(currentDay, formData);
+    
+    // Actualizar contador
+    updateChangesCounter();
+    
+    showNotification(`Horario de ${daysData[currentDay]} guardado temporalmente`, 'success');
+}
+
+// Función para actualizar la tarjeta del día
+function updateDayCard(dayCode, schedule) {
+    const statusElement = document.getElementById(`day-status-${dayCode}`);
+    const iconElement = document.getElementById(`day-icon-${dayCode}`);
+    const timeElement = document.getElementById(`day-time-${dayCode}`);
+    const cardElement = document.querySelector(`[data-day="${dayCode}"]`);
+    
+    if (schedule.hora_inicio && schedule.hora_fin) {
+        statusElement.textContent = 'Configurado';
+        iconElement.className = 'fas fa-check-circle text-green-500';
+        timeElement.textContent = `${schedule.hora_inicio} - ${schedule.hora_fin}`;
+        cardElement.classList.add('configured');
+        
+        // Agregar indicador de cambios temporales si los hay
+        if (scheduleChanges.has(dayCode)) {
+            statusElement.textContent = 'Configurado (con cambios)';
+            iconElement.className = 'fas fa-edit text-yellow-500';
+            cardElement.classList.add('has-changes');
+        } else {
+            cardElement.classList.remove('has-changes');
+        }
+    } else {
+        statusElement.textContent = 'Sin configurar';
+        iconElement.className = 'fas fa-circle text-gray-400';
+        timeElement.textContent = '--:-- - --:--';
+        cardElement.classList.remove('configured', 'has-changes');
+    }
+}
+
+// Función para limpiar el día actual
+function clearCurrentDay() {
+    if (!currentDay) return;
+    
+    if (confirm(`¿Estás seguro de que deseas limpiar el horario de ${daysData[currentDay]}?`)) {
+        // Limpiar formulario
+        clearForm();
+        
+        // Remover de cambios temporales
+        scheduleChanges.delete(currentDay);
+        
+        // Si había datos originales, marcar como limpio (eliminado)
+        if (originalSchedules.has(currentDay)) {
+            // Crear un horario vacío para marcar como eliminado
+            scheduleChanges.set(currentDay, {
+                hora_inicio: '',
+                hora_fin: '',
+                intervalo_desde: '',
+                intervalo_hasta: ''
+            });
+        }
+        
+        // Actualizar UI
+        updateDayCard(currentDay, {});
+        
+        // Actualizar contador
+        updateChangesCounter();
+        
+        showNotification(`Horario de ${daysData[currentDay]} limpiado`, 'info');
+    }
+}
+
+// Función para guardar todos los horarios
+function saveAllSchedules() {
+    if (scheduleChanges.size === 0) {
+        showNotification('No hay cambios para guardar', 'warning');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('save-all-btn');
+    const originalText = saveBtn.innerHTML;
+    
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Guardando...';
+    saveBtn.disabled = true;
+    
+    // Convertir Map a objeto para enviar
+    const schedulesToSave = {};
+    scheduleChanges.forEach((schedule, day) => {
+        schedulesToSave[day] = schedule;
+    });
+    
+    fetch('/doctor/horario/ajax/save-all/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+            schedules: schedulesToSave
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const message = data.saved_count === 1 ? 
+                `¡Horario actualizado exitosamente!` : 
+                `¡${data.saved_count} horarios actualizados exitosamente!`;
+            showNotification(message, 'success');
+            
+            // Limpiar cambios temporales
+            scheduleChanges.clear();
+            
+            // Actualizar datos originales con los nuevos datos guardados
+            Object.keys(schedulesToSave).forEach(day => {
+                const schedule = schedulesToSave[day];
+                if (schedule.hora_inicio || schedule.hora_fin) {
+                    originalSchedules.set(day, schedule);
+                } else {
+                    // Si se guardó un horario vacío, removerlo de originales
+                    originalSchedules.delete(day);
+                }
+            });
+            
+            // Actualizar UI para remover indicadores de cambios
+            Object.keys(schedulesToSave).forEach(day => {
+                const schedule = schedulesToSave[day];
+                updateDayCard(day, schedule);
+            });
+            
+            // Actualizar contador
+            updateChangesCounter();
+            
+            // Opcional: redireccionar después de un tiempo
+            setTimeout(() => {
+                window.location.href = "{% url 'doctor:horario_list' %}";
+            }, 2000);
+            
+        } else {
+            showNotification(data.error || 'Error al guardar horarios', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving schedules:', error);
+        showNotification('Error al guardar horarios', 'error');
+    })
+    .finally(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    });
+}
+
+// Función para actualizar contador de cambios
+function updateChangesCounter() {
+    const counter = document.getElementById('changes-count');
+    const changesIndicator = document.getElementById('changes-indicator');
+    const pendingChanges = document.getElementById('pending-changes');
+    
+    // Contar días con horarios configurados (tanto originales como con cambios)
+    const configuredDays = new Set();
+    
+    // Agregar días con horarios originales
+    originalSchedules.forEach((schedule, dayCode) => {
+        if (schedule.hora_inicio || schedule.hora_fin) {
+            configuredDays.add(dayCode);
+        }
+    });
+    
+    // Agregar días con cambios temporales
+    scheduleChanges.forEach((schedule, dayCode) => {
+        if (schedule.hora_inicio || schedule.hora_fin) {
+            configuredDays.add(dayCode);
+        }
+    });
+    
+    counter.textContent = configuredDays.size;
+    
+    // Mostrar indicador de cambios pendientes
+    if (scheduleChanges.size > 0) {
+        changesIndicator.classList.remove('hidden');
+        pendingChanges.textContent = scheduleChanges.size;
+    } else {
+        changesIndicator.classList.add('hidden');
+    }
+    
+    // Actualizar el texto del botón según si hay cambios pendientes
+    const saveAllBtn = document.getElementById('save-all-btn');
+    const hasChanges = scheduleChanges.size > 0;
+    
+    if (hasChanges) {
+        saveAllBtn.innerHTML = '<i class="fas fa-save mr-3 text-2xl"></i>Guardar Cambios (' + scheduleChanges.size + ')';
+        saveAllBtn.classList.add('bg-yellow-500');
+        saveAllBtn.classList.remove('bg-green-500');
+    } else {
+        saveAllBtn.innerHTML = '<i class="fas fa-check-circle mr-3 text-2xl"></i>Guardar Todos los Horarios';
+        saveAllBtn.classList.add('bg-green-500');
+        saveAllBtn.classList.remove('bg-yellow-500');
+    }
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'bg-green-100 border-green-400 text-green-700',
+        error: 'bg-red-100 border-red-400 text-red-700',
+        warning: 'bg-yellow-100 border-yellow-400 text-yellow-700',
+        info: 'bg-blue-100 border-blue-400 text-blue-700'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 transform translate-x-full ${colors[type]}`;
+    
+    toast.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Función para obtener CSRF token
+function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+// Cargar horarios existentes al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar indicador de carga
+    showLoadingIndicator();
+    
+    // Cargar todos los horarios para mostrar el estado inicial
+    loadAllSchedules();
+});
+
+// Función para mostrar indicador de carga
+function showLoadingIndicator() {
+    const counter = document.getElementById('changes-count');
+    counter.textContent = '...';
+    counter.classList.add('text-blue-600');
+}
+
+// Función para cargar todos los horarios existentes
+function loadAllSchedules() {
+    let pendingRequests = Object.keys(daysData).length;
+    
+    Object.keys(daysData).forEach(dayCode => {
+        fetch(`/doctor/horario/ajax/day/${dayCode}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.schedule) {
+                    // Verificar si realmente hay datos (no solo campos vacíos)
+                    const schedule = data.schedule;
+                    const hasData = schedule.hora_inicio || schedule.hora_fin || 
+                                   schedule.intervalo_desde || schedule.intervalo_hasta;
+                    
+                    if (hasData) {
+                        updateDayCard(dayCode, schedule);
+                        originalSchedules.set(dayCode, schedule);
+                    }
+                }
+            })
+            .catch(error => console.error(`Error loading ${dayCode}:`, error))
+            .finally(() => {
+                pendingRequests--;
+                if (pendingRequests === 0) {
+                    // Todos los horarios cargados, actualizar contador
+                    const counter = document.getElementById('changes-count');
+                    counter.classList.remove('text-blue-600');
+                    updateChangesCounter();
+                }
+            });
+    });
+}
+
+// Advertencia antes de salir si hay cambios sin guardar
+window.addEventListener('beforeunload', function(e) {
+    if (scheduleChanges.size > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+{% endblock %}

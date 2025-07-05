@@ -1,0 +1,224 @@
+{% extends 'home.html' %} 
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+{% load static %}
+{% include 'fragments/messages.html' %}
+
+<section class="dark:bg-principal mt-2">
+  <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+    <div class="sm:pt-8 lg:pt-4">
+      <h1 class="rounded-2xl bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+        {{ title|default:"Gestión de Permisos" }}
+      </h1>
+    </div>
+
+    <div class="lg:p-2 rounded-3xl" data-aos="fade-up" data-aos-delay="200">
+
+      <!-- Barra de búsqueda -->
+      <div class="p-4 flex justify-center">
+        <div class="relative mt-1 w-full max-w-md">
+          <form method="GET">
+            <input type="text" name="q" id="table-search"
+              class="text-center pl-10 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-12 dark:bg-principal dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Buscar permisos..." value="{{ request.GET.q }}">
+            <div class="absolute inset-y-0 left-0 flex items-center ps-3 pointer-events-none">
+              <i class="fa fa-search text-gray-500 dark:text-gray-400"></i>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabla de permisos de grupo -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-center text-lg">
+          <thead class="uppercase font-Tiny5 bg-gray-50 dark:bg-secundario dark:text-blue-300">
+            <tr>
+              <th class="px-6 py-3">ID</th>
+              <th class="px-6 py-3">Grupo</th>
+              <th class="px-6 py-3">Módulo</th>
+              <th class="px-6 py-3">Menú</th>
+              <th class="px-6 py-3">Permisos</th>
+              <th class="px-6 py-3">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for gp in group_permissions %}
+            <tr class="dark:text-gray-400 bg-white border-b dark:bg-[#0b1121] dark:border-secundario hover:bg-gray-50 dark:hover:bg-[#121c33]">
+              <td class="px-6 py-4">{{ gp.id }}</td>
+              <td class="px-6 py-4 font-semibold">
+                <span class="bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300">
+                  {{ gp.group.name }}
+                </span>
+              </td>
+              <td class="px-6 py-4">{{ gp.module.name }}</td>
+              <td class="px-6 py-4">
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{ gp.module.menu.name }}</span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1 justify-center">
+                  {% if gp.permissions.all %}
+                    <!-- Mostrar primeros 3 permisos -->
+                    {% for permission in gp.permissions.all|slice:":3" %}
+                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded dark:bg-green-900 dark:text-green-300 border border-green-200 dark:border-green-700">
+                      {{ permission.codename }}
+                    </span>
+                    {% endfor %}
+                    
+                    <!-- Botón "más" si hay más de 3 permisos -->
+                    {% if gp.permissions.all|length > 3 %}
+                    <button onclick="togglePermissions('{{ gp.id }}')" 
+                      class="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 transition-colors border border-gray-300 dark:border-gray-600">
+                      <i class="fa-solid fa-chevron-down mr-1" id="chevron-{{ gp.id }}"></i>
+                      +{{ gp.permissions.all|length|add:"-3" }} más
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Permisos adicionales (inicialmente ocultos) -->
+                    {% if gp.permissions.all|length > 3 %}
+                    <div id="permissions-{{ gp.id }}" class="hidden w-full">
+                      <div class="flex flex-wrap gap-1 justify-center mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        {% for permission in gp.permissions.all|slice:"3:" %}
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded dark:bg-blue-900 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                          {{ permission.codename }}
+                        </span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    {% endif %}
+                  {% else %}
+                  <span class="text-sm text-gray-500 dark:text-gray-400 italic">Sin permisos</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                {% if permissions.change_groupmodulepermission %}
+                <a href="{% url 'security:group_permission_update' gp.id %}" class="text-blue-600 hover:text-blue-800 mx-1">
+                  <i class="fa-solid fa-edit text-lg"></i>
+                </a>
+                {% endif %}
+                {% if permissions.delete_groupmodulepermission %}
+                <a href="#" class="text-red-600 hover:text-red-800 mx-1"
+                  onclick="openDeleteModal('{{ gp.id }}', '{{ gp.group.name }} - {{ gp.module.name }}')">
+                  <i class="fa-solid fa-trash text-lg"></i>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="py-4 text-gray-500 dark:text-gray-400">No hay permisos de grupo configurados.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      {% if page_obj.has_other_pages %}
+      <div class="flex justify-center mt-4">
+        <nav aria-label="Page navigation">
+          <ul class="inline-flex -space-x-px">
+            {% if page_obj.has_previous %}
+            <li>
+              <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                class="px-3 h-8 leading-tight bg-white border rounded-s-lg dark:bg-[#0b1121] dark:border-secundario text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121c33]">Anterior</a>
+            </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li>
+              <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                class="px-3 h-8 leading-tight {% if num == page_obj.number %}bg-blue-50 text-blue-600 border dark:bg-secundario dark:text-blue-300{% else %}bg-white text-gray-500 border dark:bg-[#0b1121] dark:text-gray-400{% endif %} hover:bg-gray-100 dark:hover:bg-[#121c33] rounded">
+                {{ num }}
+              </a>
+            </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li>
+              <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                class="px-3 h-8 leading-tight bg-white border rounded-e-lg dark:bg-[#0b1121] dark:border-secundario text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#121c33]">Siguiente</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+
+      <!-- Botones de permisos -->
+      <div class="flex flex-col md:flex-row justify-center gap-2 mt-6">
+        <!-- Botón Gestión de Permisos (Principal) -->
+        {% if create_url %}
+        <a href="{{ create_url }}"
+          class="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-full flex items-center justify-center transition-colors font-semibold">
+          <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Gestionar Permisos Dinámicamente
+        </a>
+        {% endif %}
+        
+        <!-- Botón Configuración Individual (Secundario) -->
+       <!--  {% if create_traditional_url %}
+        <a href="{{ create_traditional_url }}"
+          class="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-full flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-plus mr-2"></i>Nueva Configuración Individual
+        </a>
+        {% endif %} -->
+        
+        <!-- Botón Inicio -->
+        <a href="{% url 'home' %}"
+          class="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-full flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-house"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% include 'fragments/delete.html' %}
+<script>
+function openDeleteModal(id, name) {
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = `{% url 'security:group_permission_delete' 0 %}`.replace('0', id);
+    document.getElementById('Description').textContent = `ID: ${id} - ${name}`;
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Función para mostrar/ocultar permisos adicionales
+function togglePermissions(id) {
+    const permissionsDiv = document.getElementById(`permissions-${id}`);
+    const chevron = document.getElementById(`chevron-${id}`);
+    const button = chevron.parentElement;
+    
+    if (permissionsDiv.classList.contains('hidden')) {
+        // Mostrar permisos
+        permissionsDiv.classList.remove('hidden');
+        chevron.classList.remove('fa-chevron-down');
+        chevron.classList.add('fa-chevron-up');
+        button.innerHTML = button.innerHTML.replace('más', 'menos');
+    } else {
+        // Ocultar permisos
+        permissionsDiv.classList.add('hidden');
+        chevron.classList.remove('fa-chevron-up');
+        chevron.classList.add('fa-chevron-down');
+        button.innerHTML = button.innerHTML.replace('menos', 'más');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForm = document.getElementById('deleteForm');
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            const submitBtn = deleteForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

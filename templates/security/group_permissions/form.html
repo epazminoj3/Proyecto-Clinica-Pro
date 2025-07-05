@@ -1,0 +1,1024 @@
+{% extends 'home.html' %} 
+<title>{% block title %}{{title}}{% endblock %}</title>
+{% load static %}
+
+<style>
+/* Estilos para la gestión dinámica de permisos */
+.module-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    min-height: 65px; /* Altura mínima para cálculo del scroll */
+}
+
+.module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #3b82f6;
+}
+
+.module-card.selected {
+    border-color: #3b82f6;
+    background-color: #dbeafe;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.module-card.edited {
+    border-color: #10b981;
+    background-color: #ecfdf5;
+}
+
+.dark .module-card.selected {
+    background-color: #1e3a8a;
+}
+
+.dark .module-card.edited {
+    background-color: #064e3b;
+}
+
+.permission-checkbox {
+    transform: scale(1.1);
+    margin-right: 8px;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.permission-group {
+    border-left: 4px solid #e5e7eb;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.permission-group.has-selected {
+    border-left-color: #10b981;
+    background-color: #f0fdf4;
+}
+
+.dark .permission-group.has-selected {
+    background-color: #064e3b;
+}
+
+.group-selector {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dark .group-selector {
+    background: #1f2937;
+}
+
+/* Altura específica para mostrar aproximadamente 5-6 módulos (más alto) */
+#modules-container {
+    height: 400px !important; /* Aumentar altura para mostrar más módulos */
+    max-height: 400px !important;
+    overflow-y: auto !important;
+}
+
+#permissions-container {
+    height: 400px !important; /* Misma altura para mantener simetría */
+    max-height: 400px !important;
+    overflow-y: auto !important;
+}
+</style>
+
+{% block content %}
+<section class="dark:bg-principal">
+    <div class="text-center" data-aos="fade" data-aos-delay="200">
+        <div class="sm:pt-28 lg:pt-4">
+             <h1 class="rounded-2xl bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+                {{ title }}
+             </h1>
+        </div>
+
+        <!-- SELECTOR DE GRUPO -->
+        <div class="mx-4 lg:mx-20 mb-6" data-aos="fade-up">
+            <div class="group-selector bg-white dark:bg-secundario max-w-6xl mx-auto">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                    <i class="fa-solid fa-users mr-2 text-blue-600"></i>
+                    Seleccionar Grupo para Gestionar Permisos
+                </h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {% for group in groups %}
+                    <div class="group-option p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors text-center"
+                         data-group-id="{{ group.id }}"
+                         onclick="selectGroup({{ group.id }}, '{{ group.name|escapejs }}')">
+                        <i class="fa-solid fa-users text-blue-600 text-2xl mb-2"></i>
+                        <div class="font-medium text-gray-800 dark:text-gray-200">{{ group.name }}</div>
+                        <div id="group-summary-{{ group.id }}" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <!-- Se llenará dinámicamente -->
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-8">
+                        <i class="fa-solid fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>No hay grupos disponibles</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Información del grupo seleccionado -->
+                <div id="selected-group-info" class="hidden mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-blue-800 dark:text-blue-200">
+                                Grupo Seleccionado: <span id="current-group-name"></span>
+                            </h4>
+                            <p class="text-sm text-blue-600 dark:text-blue-400" id="group-summary-text">
+                                Cargando información...
+                            </p>
+                        </div>
+                        <button onclick="clearGroupSelection()" 
+                                class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg transition-colors">
+                            <i class="fa-solid fa-refresh"></i> Restablecer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENEDOR PRINCIPAL: MÓDULOS Y PERMISOS -->
+        <div id="main-content" class="hidden mx-4 lg:mx-20" data-aos="fade">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+                
+                <!-- COLUMNA IZQUIERDA: MÓDULOS -->
+                <div class="bg-white dark:bg-secundario rounded-3xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                            <i class="fa-solid fa-cube mr-2 text-green-600"></i>
+                            Módulos Asignados
+                        </h3>
+                        <div id="modules-counter" class="text-sm text-gray-500 dark:text-gray-400">
+                            0 módulos
+                        </div>
+                    </div>
+                    
+                    <div id="modules-container" class="space-y-3 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3" style="height: 450px; max-height: 450px;">
+                        <!-- Loading placeholder -->
+                        <div id="modules-loading" class="hidden text-center py-8">
+                            <i class="fa-solid fa-spinner loading-spinner text-2xl text-green-600 mb-2"></i>
+                            <p class="text-gray-500 dark:text-gray-400">Cargando módulos...</p>
+                        </div>
+                        
+                        <!-- Empty state -->
+                        <div id="modules-empty" class="text-center text-gray-500 dark:text-gray-400 py-8">
+                            <i class="fa-solid fa-cube text-2xl mb-2"></i>
+                            <p>Seleccione un grupo para ver sus módulos</p>
+                        </div>
+                        
+                        <!-- Modules will be loaded here dynamically -->
+                        <div id="modules-list" class="space-y-3"></div>
+                    </div>
+                </div>
+                
+                <!-- COLUMNA DERECHA: PERMISOS -->
+                <div class="bg-white dark:bg-secundario rounded-3xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
+                            <i class="fa-solid fa-shield-halved mr-2 text-purple-600"></i>
+                            Configurar Permisos
+                        </h3>
+                        <div class="flex gap-2">
+                            <button id="select-all-btn" onclick="selectAllCurrentPermissions()" 
+                                class="hidden text-xs bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 px-3 py-1 rounded-full transition-colors">
+                                <i class="fa-solid fa-check-double mr-1"></i>Todos
+                            </button>
+                            <button id="deselect-all-btn" onclick="deselectAllCurrentPermissions()" 
+                                class="hidden text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 px-3 py-1 rounded-full transition-colors">
+                                <i class="fa-solid fa-xmark mr-1"></i>Ninguno
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="permissions-container" class="overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-3" style="height: 400px; max-height: 400px;">
+                        <!-- Loading placeholder -->
+                        <div id="permissions-loading" class="hidden text-center py-8">
+                            <i class="fa-solid fa-spinner loading-spinner text-2xl text-purple-600 mb-2"></i>
+                            <p class="text-gray-500 dark:text-gray-400">Cargando permisos...</p>
+                        </div>
+                        
+                        <!-- Empty state -->
+                        <div id="permissions-empty" class="text-center text-gray-500 dark:text-gray-400 py-8">
+                            <i class="fa-solid fa-arrow-left text-2xl mb-2"></i>
+                            <p>Seleccione un módulo para configurar sus permisos</p>
+                        </div>
+                        
+                        <!-- Module info and permissions will be loaded here -->
+                        <div id="permissions-content" class="hidden">
+                            <div id="module-info" class="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                <!-- Module information -->
+                            </div>
+                            <div id="permissions-list" class="space-y-6">
+                                <!-- Permissions checkboxes -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción para permisos -->
+                    <div id="permissions-actions" class="hidden mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="save-continue-btn" onclick="saveAndContinue()" 
+                                class="flex-1 bg-yellow-500 hover:bg-yellow-600 border border-yellow-600 text-black py-2 px-4 rounded-lg transition-colors font-semibold flex items-center justify-center">
+                                <i class="fa-solid fa-save mr-2 text-black"></i><span class="text-black">Guardar y Seguir</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÓN GUARDAR GLOBAL -->
+        <div id="global-save-section" class="hidden mx-4 lg:mx-20 mt-8" data-aos="fade-up">
+            <div class="max-w-7xl mx-auto text-center">
+                <button id="global-save-btn" onclick="saveAllChanges()" 
+                    class="bg-indigo-600 hover:bg-indigo-700 border border-indigo-700 py-4 px-12 rounded-xl text-xl font-bold transition-colors flex items-center justify-center mx-auto min-w-80">
+                    <i class="fa-solid fa-save mr-3 text-2xl text-black"></i>
+                    <span class="text-black">Guardar Todos los Cambios</span>
+                </button>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                    Finaliza la configuración de permisos para el grupo seleccionado
+                </p>
+            </div>
+        </div>
+
+        <!-- BARRA DE ESTADO -->
+        <div id="status-bar" class="hidden mx-4 lg:mx-20 mt-6" data-aos="fade-up">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-white dark:bg-secundario rounded-lg p-4 flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ back_url }}" 
+                           class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 border border-gray-600 rounded-lg transition-colors">
+                            <i class="fa-solid fa-arrow-left mr-2 text-black"></i>
+                            <span class="text-black">Volver</span>
+                        </a>
+                    </div>
+                    
+                    <div id="global-summary" class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                        <span id="summary-text">Seleccione un grupo para comenzar</span>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button id="refresh-btn" onclick="refreshCurrentView()" 
+                            class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 border border-blue-600 rounded-lg transition-colors">
+                            <i class="fa-solid fa-refresh mr-2 text-black"></i>
+                            <span class="text-black">Actualizar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JavaScript para funcionalidad dinámica -->
+<script>
+// Variables globales
+let currentGroupId = null;
+let currentModuleId = null;
+let unsavedChanges = false;
+
+// CAMBIOS TEMPORALES POR GRUPO - Estructura independiente para cada grupo
+let groupSessionChanges = new Map(); // Estructura: groupId -> Map(moduleId -> [permissionIds])
+let groupEditedModules = new Map();  // Estructura: groupId -> Set(moduleIds)
+let originalPermissions = new Map(); // Almacena permisos originales para poder revertir
+
+// Funciones de apoyo para manejo de cambios por grupo
+function getGroupSessionChanges(groupId) {
+    if (!groupSessionChanges.has(groupId)) {
+        groupSessionChanges.set(groupId, new Map());
+    }
+    return groupSessionChanges.get(groupId);
+}
+
+function getGroupEditedModules(groupId) {
+    if (!groupEditedModules.has(groupId)) {
+        groupEditedModules.set(groupId, new Set());
+    }
+    return groupEditedModules.get(groupId);
+}
+
+function hasGroupChanges(groupId) {
+    const sessionChanges = getGroupSessionChanges(groupId);
+    return sessionChanges.size > 0;
+}
+
+function clearGroupChanges(groupId) {
+    groupSessionChanges.delete(groupId);
+    groupEditedModules.delete(groupId);
+}
+
+// Función para seleccionar grupo
+function selectGroup(groupId, groupName) {
+    if (unsavedChanges) {
+        if (!confirm('Tiene cambios sin guardar en el módulo actual. ¿Desea continuar?')) {
+            return;
+        }
+    }
+    
+    currentGroupId = groupId;
+    currentModuleId = null;
+    unsavedChanges = false;
+    
+    // Actualizar UI del selector de grupo
+    document.querySelectorAll('.group-option').forEach(option => {
+        option.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+    });
+    
+    const selectedOption = document.querySelector(`[data-group-id="${groupId}"]`);
+    if (selectedOption) {
+        selectedOption.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+    }
+    
+    // Mostrar información del grupo seleccionado
+    document.getElementById('current-group-name').textContent = groupName;
+    document.getElementById('selected-group-info').classList.remove('hidden');
+    document.getElementById('main-content').classList.remove('hidden');
+    document.getElementById('status-bar').classList.remove('hidden');
+    document.getElementById('global-save-section').classList.remove('hidden');
+    
+    // Cargar módulos del grupo (solo los asignados a este grupo)
+    loadGroupModules(groupId);
+    
+    // Limpiar vista de permisos
+    clearPermissionsView();
+    
+    // Actualizar resumen
+    updateGlobalSummary();
+}
+
+// Función para limpiar selección de grupo
+function clearGroupSelection() {
+    if (unsavedChanges) {
+        if (!confirm('Tiene cambios sin guardar en el módulo actual. ¿Desea continuar?')) {
+            return;
+        }
+    }
+    
+    // Solo preguntar si hay cambios temporales importantes
+    const currentSessionChanges = getGroupSessionChanges(currentGroupId || 0);
+    if (currentSessionChanges.size > 0) {
+        if (!confirm(`Tiene ${currentSessionChanges.size} módulos con cambios temporales. ¿Desea perder estos cambios?`)) {
+            return;
+        }
+    }
+    
+    // Si hay un grupo actual, limpiar solo sus cambios
+    if (currentGroupId) {
+        clearGroupChanges(currentGroupId);
+    }
+    
+    currentGroupId = null;
+    currentModuleId = null;
+    unsavedChanges = false;
+    originalPermissions.clear();
+    
+    // Ocultar elementos
+    document.getElementById('selected-group-info').classList.add('hidden');
+    document.getElementById('main-content').classList.add('hidden');
+    document.getElementById('status-bar').classList.add('hidden');
+    document.getElementById('global-save-section').classList.add('hidden');
+    
+    // Limpiar selecciones
+    document.querySelectorAll('.group-option').forEach(option => {
+        option.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'border-blue-500');
+    });
+    
+    clearPermissionsView();
+}
+
+// Función para cargar módulos de un grupo
+function loadGroupModules(groupId) {
+    const loading = document.getElementById('modules-loading');
+    const empty = document.getElementById('modules-empty');
+    const list = document.getElementById('modules-list');
+    const counter = document.getElementById('modules-counter');
+    
+    // Mostrar loading
+    empty.classList.add('hidden');
+    list.innerHTML = '';
+    loading.classList.remove('hidden');
+    
+    fetch(`/security/group-permissions/ajax/group/${groupId}/modules/`)
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            
+            if (data.success && data.modules.length > 0) {
+                list.innerHTML = '';
+                counter.textContent = `${data.modules.length} módulos`;
+                
+                // Agrupar módulos por menú
+                const modulesByMenu = {};
+                data.modules.forEach(module => {
+                    if (!modulesByMenu[module.menu_name]) {
+                        modulesByMenu[module.menu_name] = [];
+                    }
+                    modulesByMenu[module.menu_name].push(module);
+                });
+                
+                // Renderizar módulos agrupados
+                Object.keys(modulesByMenu).forEach(menuName => {
+                    // Header del menú
+                    const menuHeader = document.createElement('div');
+                    menuHeader.className = 'text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 mt-3 first:mt-0 uppercase tracking-wide';
+                    menuHeader.innerHTML = `<i class="fa-solid fa-folder mr-2"></i>${menuName}`;
+                    list.appendChild(menuHeader);
+                    
+                    // Módulos del menú
+                    modulesByMenu[menuName].forEach(module => {
+                        const moduleCard = createModuleCard(module);
+                        list.appendChild(moduleCard);
+                    });
+                });
+                
+                // Actualizar información del grupo
+                document.getElementById('group-summary-text').textContent = 
+                    `${data.modules.length} módulos asignados`;
+                    
+            } else {
+                empty.classList.remove('hidden');
+                counter.textContent = '0 módulos';
+                empty.innerHTML = `
+                    <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                        <i class="fa-solid fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>Este grupo no tiene módulos asignados</p>
+                        <p class="text-xs mt-2">Configure primero las asignaciones de módulos por grupo</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            loading.classList.add('hidden');
+            console.error('Error loading modules:', error);
+            showNotification('Error al cargar módulos', 'error');
+        });
+}
+
+// Función para crear card de módulo
+function createModuleCard(module) {
+    const card = document.createElement('div');
+    card.className = `module-card p-3 rounded-lg transition-all border border-gray-200 dark:border-gray-600`;
+    card.setAttribute('data-module-id', module.id);
+    card.onclick = () => selectModule(module.id, module.name);
+    
+    // Verificar si hay cambios temporales PARA ESTE GRUPO
+    const sessionChanges = getGroupSessionChanges(currentGroupId);
+    const hasTemporaryChanges = sessionChanges.has(module.id);
+    let statusIcon, statusText, cardStyle = '';
+    
+    if (hasTemporaryChanges) {
+        // Cambios temporales (naranja/amarillo) - Persistir al cambiar de grupo
+        statusIcon = '<i class="fa-solid fa-clock text-orange-500"></i>';
+        const tempPerms = sessionChanges.get(module.id);
+        statusText = `${tempPerms.length} permisos (temporal)`;
+        cardStyle = 'border-orange-400 bg-yellow-50 dark:bg-yellow-900 dark:border-yellow-600';
+        
+        // Aplicar estilo directamente para que persista
+        card.style.borderColor = '#f59e0b';
+        card.style.backgroundColor = '#fef3c7';
+    } else if (module.has_permissions) {
+        // Guardado definitivo (verde)
+        statusIcon = '<i class="fa-solid fa-check-circle text-green-600"></i>';
+        statusText = `${module.permissions_count} permisos`;
+        cardStyle = 'border-green-400 bg-green-50 dark:bg-green-900 dark:border-green-600';
+    } else {
+        // Sin configurar (gris)
+        statusIcon = '<i class="fa-solid fa-circle-dot text-gray-400"></i>';
+        statusText = 'Sin configurar';
+    }
+    
+    if (cardStyle) {
+        card.className += ` ${cardStyle}`;
+    }
+    
+    card.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="${module.icon} text-blue-600 mr-3"></i>
+                <div>
+                    <div class="font-medium text-gray-800 dark:text-gray-200">${module.name}</div>
+                    ${module.description ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${module.description}</div>` : ''}
+                </div>
+            </div>
+            <div class="flex flex-col items-end">
+                ${statusIcon}
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">${statusText}</div>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Función para seleccionar módulo
+function selectModule(moduleId, moduleName) {
+    if (unsavedChanges) {
+        if (!confirm('Tiene cambios sin guardar en el módulo actual. ¿Desea continuar?')) {
+            return;
+        }
+    }
+    
+    if (!currentGroupId) {
+        showNotification('Debe seleccionar un grupo primero', 'warning');
+        return;
+    }
+    
+    currentModuleId = moduleId;
+    unsavedChanges = false;
+    
+    // Actualizar UI de módulos
+    document.querySelectorAll('.module-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const selectedCard = document.querySelector(`[data-module-id="${moduleId}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+    }
+    
+    // Cargar permisos del módulo
+    loadModulePermissions(currentGroupId, moduleId);
+}
+
+// Función para cargar permisos de un módulo
+function loadModulePermissions(groupId, moduleId) {
+    const loading = document.getElementById('permissions-loading');
+    const empty = document.getElementById('permissions-empty');
+    const content = document.getElementById('permissions-content');
+    const actions = document.getElementById('permissions-actions');
+    
+    // Mostrar loading
+    empty.classList.add('hidden');
+    content.classList.add('hidden');
+    actions.classList.add('hidden');
+    loading.classList.remove('hidden');
+    
+    fetch(`/security/group-permissions/ajax/group/${groupId}/module/${moduleId}/permissions/`)
+        .then(response => response.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            
+            if (data.success) {
+                renderModulePermissions(data);
+                content.classList.remove('hidden');
+                actions.classList.remove('hidden');
+                
+                // Mostrar botones de acción
+                document.getElementById('select-all-btn').classList.remove('hidden');
+                document.getElementById('deselect-all-btn').classList.remove('hidden');
+            } else {
+                showNotification(data.error || 'Error al cargar permisos', 'error');
+                empty.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            loading.classList.add('hidden');
+            console.error('Error loading permissions:', error);
+            showNotification('Error al cargar permisos', 'error');
+            empty.classList.remove('hidden');
+        });
+}
+
+// Función para renderizar permisos del módulo
+function renderModulePermissions(data) {
+    const moduleInfo = document.getElementById('module-info');
+    const permissionsList = document.getElementById('permissions-list');
+    
+    // Guardar permisos originales para poder revertir
+    if (!originalPermissions.has(currentModuleId)) {
+        const originalPerms = data.permissions.filter(p => p.is_assigned).map(p => p.id);
+        originalPermissions.set(currentModuleId, originalPerms);
+    }
+    
+    // Información del módulo
+    moduleInfo.innerHTML = `
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-semibold text-gray-800 dark:text-gray-200">${data.module_name}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Grupo: ${data.group_name}</p>
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                ${data.permissions.length} permisos disponibles
+            </div>
+        </div>
+    `;
+    
+    // Lista de permisos
+    if (data.permissions.length > 0) {
+        // Agrupar permisos por tipo
+        const permissionsByType = {};
+        data.permissions.forEach(permission => {
+            const type = permission.codename.split('_')[0];
+            if (!permissionsByType[type]) {
+                permissionsByType[type] = [];
+            }
+            permissionsByType[type].push(permission);
+        });
+        
+        permissionsList.innerHTML = '';
+        
+        Object.keys(permissionsByType).forEach(type => {
+            const typeSection = document.createElement('div');
+            typeSection.className = 'permission-group p-3 rounded-lg border border-gray-200 dark:border-gray-600';
+            
+            const typeLabels = {
+                'add': { icon: 'fa-plus', label: 'Crear', color: 'green' },
+                'change': { icon: 'fa-edit', label: 'Editar', color: 'blue' },
+                'delete': { icon: 'fa-trash', label: 'Eliminar', color: 'red' },
+                'view': { icon: 'fa-eye', label: 'Ver', color: 'gray' }
+            };
+            
+            const typeInfo = typeLabels[type] || { icon: 'fa-key', label: type, color: 'purple' };
+            
+            // Verificar si hay permisos temporales guardados para este módulo EN ESTE GRUPO
+            const sessionChanges = getGroupSessionChanges(currentGroupId);
+            const sessionPerms = sessionChanges.get(currentModuleId) || [];
+            
+            typeSection.innerHTML = `
+                <h5 class="font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                    <i class="fa-solid ${typeInfo.icon} mr-2 text-${typeInfo.color}-600"></i>
+                    Permisos de ${typeInfo.label}
+                </h5>
+                <div class="grid grid-cols-1 gap-3">
+                    ${permissionsByType[type].map(permission => {
+                        // Determinar si debe estar marcado (original o cambio temporal)
+                        const isChecked = sessionPerms.length > 0 ? 
+                            sessionPerms.includes(permission.id) : 
+                            permission.is_assigned;
+                        
+                        return `
+                        <label class="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+                            <input type="checkbox" 
+                                   class="permission-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700" 
+                                   data-permission-id="${permission.id}"
+                                   ${isChecked ? 'checked' : ''}
+                                   onchange="markUnsavedChanges()">
+                            <span class="text-sm text-gray-700 dark:text-gray-300 ml-3">${permission.name}</span>
+                        </label>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            
+            permissionsList.appendChild(typeSection);
+        });
+        
+        // Actualizar estilos de grupos con permisos seleccionados
+        updatePermissionGroupStyles();
+        
+    } else {
+        permissionsList.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                <i class="fa-solid fa-exclamation-triangle text-2xl mb-2"></i>
+                <p>Este módulo no tiene permisos configurados</p>
+            </div>
+        `;
+    }
+}
+
+// Función para marcar cambios sin guardar
+function markUnsavedChanges() {
+    unsavedChanges = true;
+    updatePermissionGroupStyles();
+}
+
+// Función para actualizar estilos de grupos de permisos
+function updatePermissionGroupStyles() {
+    document.querySelectorAll('.permission-group').forEach(group => {
+        const checkedBoxes = group.querySelectorAll('.permission-checkbox:checked');
+        if (checkedBoxes.length > 0) {
+            group.classList.add('has-selected');
+        } else {
+            group.classList.remove('has-selected');
+        }
+    });
+}
+
+// Función para seleccionar todos los permisos actuales
+function selectAllCurrentPermissions() {
+    document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    markUnsavedChanges();
+    updatePermissionGroupStyles();
+}
+
+// Función para deseleccionar todos los permisos actuales
+function deselectAllCurrentPermissions() {
+    document.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    markUnsavedChanges();
+    updatePermissionGroupStyles();
+}
+
+// Función para guardar y continuar (guardado temporal)
+function saveAndContinue() {
+    if (!currentGroupId || !currentModuleId) {
+        showNotification('Seleccione un grupo y módulo primero', 'warning');
+        return;
+    }
+    
+    const selectedPermissions = [];
+    document.querySelectorAll('.permission-checkbox:checked').forEach(checkbox => {
+        selectedPermissions.push(parseInt(checkbox.dataset.permissionId));
+    });
+    
+    // Guardar cambios temporalmente en memoria PARA ESTE GRUPO
+    const sessionChanges = getGroupSessionChanges(currentGroupId);
+    const editedModules = getGroupEditedModules(currentGroupId);
+    
+    sessionChanges.set(currentModuleId, selectedPermissions);
+    editedModules.add(currentModuleId);
+    unsavedChanges = false;
+    
+    // Actualizar UI visual del módulo (persistirá al cambiar de grupo)
+    const moduleCard = document.querySelector(`[data-module-id="${currentModuleId}"]`);
+    if (moduleCard) {
+        // Marcar como editado temporalmente (color amarillo/naranja)
+        moduleCard.classList.add('edited');
+        moduleCard.classList.remove('border', 'border-gray-200', 'dark:border-gray-600');
+        moduleCard.style.borderColor = '#f59e0b'; // Color naranja para indicar cambio temporal
+        moduleCard.style.backgroundColor = '#fef3c7'; // Fondo amarillo claro
+        
+        // En modo oscuro
+        if (document.body.classList.contains('dark')) {
+            moduleCard.style.backgroundColor = '#451a03'; // Fondo amarillo oscuro
+        }
+        
+        // Actualizar el texto de estado
+        const statusText = moduleCard.querySelector('.text-xs');
+        if (statusText) {
+            statusText.textContent = `${selectedPermissions.length} permisos (temporal)`;
+        }
+        
+        // Actualizar el icono a temporal
+        const statusIcon = moduleCard.querySelector('i:last-child');
+        if (statusIcon) {
+            statusIcon.className = 'fa-solid fa-clock text-orange-500';
+        }
+    }
+    
+    showNotification(`Cambios guardados temporalmente para el módulo. ${selectedPermissions.length} permisos seleccionados.`, 'info');
+    
+    // Actualizar resumen global
+    updateGlobalSummary();
+}
+
+// Función para guardar todos los cambios (guardado definitivo real)
+function saveAllChanges() {
+    const sessionChanges = getGroupSessionChanges(currentGroupId);
+    if (sessionChanges.size === 0) {
+        showNotification('No hay cambios temporales para guardar', 'warning');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('global-save-btn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner loading-spinner mr-3 text-2xl text-black"></i><span class="text-black">Guardando definitivamente...</span>';
+    saveBtn.disabled = true;
+    
+    // Guardar todos los cambios uno por uno
+    const promises = [];
+    
+    sessionChanges.forEach((permissionIds, moduleId) => {
+        const promise = fetch(`/security/group-permissions/ajax/group/${currentGroupId}/module/${moduleId}/save/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({
+                permission_ids: permissionIds
+            })
+        });
+        promises.push(promise);
+    });
+    
+    Promise.all(promises)
+        .then(responses => Promise.all(responses.map(r => r.json())))
+        .then(results => {
+            const failed = results.filter(r => !r.success);
+            
+            if (failed.length === 0) {
+                showNotification(`¡Guardado exitoso! Se actualizaron ${sessionChanges.size} módulos definitivamente.`, 'success');
+                
+                // Actualizar UI para mostrar que están guardados definitivamente
+                sessionChanges.forEach((permissionIds, moduleId) => {
+                    const moduleCard = document.querySelector(`[data-module-id="${moduleId}"]`);
+                    if (moduleCard) {
+                        // Cambiar a color verde (definitivo)
+                        moduleCard.style.borderColor = '#10b981';
+                        moduleCard.style.backgroundColor = '#ecfdf5';
+                        
+                        // En modo oscuro
+                        if (document.body.classList.contains('dark')) {
+                            moduleCard.style.backgroundColor = '#064e3b';
+                        }
+                        
+                        // Actualizar texto
+                        const statusText = moduleCard.querySelector('.text-xs');
+                        if (statusText) {
+                            statusText.textContent = `${permissionIds.length} permisos`;
+                        }
+                        
+                        // Actualizar icono a guardado
+                        const statusIcon = moduleCard.querySelector('i:last-child');
+                        if (statusIcon) {
+                            statusIcon.className = 'fa-solid fa-check-circle text-green-600';
+                        }
+                    }
+                });
+                
+                // Limpiar cambios temporales SOLO para este grupo
+                clearGroupChanges(currentGroupId);
+                unsavedChanges = false;
+                
+                setTimeout(() => {
+                    if (confirm('¿Desea volver a la lista de permisos?')) {
+                        window.location.href = '/security/group-permissions/';
+                    } else {
+                        // Recargar para mostrar estado actual
+                        loadGroupModules(currentGroupId);
+                    }
+                }, 2000);
+                
+            } else {
+                showNotification(`Error: ${failed.length} módulos no se pudieron guardar`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving all changes:', error);
+            showNotification('Error al guardar los cambios', 'error');
+        })
+        .finally(() => {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        });
+}
+
+// Función para guardar final (guardar temporalmente Y definitivamente)
+function saveFinal() {
+    // Primero guardar temporalmente
+    saveAndContinue();
+    
+    // Luego esperar un momento y guardar definitivamente
+    setTimeout(() => {
+        saveAllChanges();
+    }, 500);
+}
+
+function finalizeAllChanges() {
+    // Esta función ya no es necesaria, se reemplaza por saveAllChanges
+    saveAllChanges();
+}
+
+// Función para limpiar vista de permisos
+function clearPermissionsView() {
+    document.getElementById('permissions-empty').classList.remove('hidden');
+    document.getElementById('permissions-content').classList.add('hidden');
+    document.getElementById('permissions-actions').classList.add('hidden');
+    document.getElementById('select-all-btn').classList.add('hidden');
+    document.getElementById('deselect-all-btn').classList.add('hidden');
+}
+
+// Función para actualizar resumen global
+function updateGlobalSummary() {
+    if (!currentGroupId) {
+        document.getElementById('summary-text').textContent = 'Seleccione un grupo para comenzar';
+        return;
+    }
+    
+    fetch(`/security/group-permissions/ajax/group/${currentGroupId}/summary/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const editedModules = getGroupEditedModules(currentGroupId);
+                const editedCount = editedModules.size;
+                const summaryText = `${data.modules_count} módulos asignados, ${data.total_permissions} permisos configurados` + 
+                    (editedCount > 0 ? `, ${editedCount} editados en esta sesión` : '');
+                document.getElementById('summary-text').textContent = summaryText;
+            }
+        })
+        .catch(error => console.error('Error updating summary:', error));
+}
+
+// Función para refrescar vista actual
+function refreshCurrentView() {
+    if (currentGroupId) {
+        loadGroupModules(currentGroupId);
+        updateGlobalSummary();
+        
+        if (currentModuleId) {
+            loadModulePermissions(currentGroupId, currentModuleId);
+        }
+    }
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: 'text-green-600',
+        error: 'text-red-600',
+        warning: 'text-yellow-600',
+        info: 'text-blue-600'
+    };
+    
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // Crear notificación toast
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 transform translate-x-full`;
+    
+    if (type === 'success') {
+        toast.className += ' bg-green-100 border border-green-400 text-green-700';
+    } else if (type === 'error') {
+        toast.className += ' bg-red-100 border border-red-400 text-red-700';
+    } else if (type === 'warning') {
+        toast.className += ' bg-yellow-100 border border-yellow-400 text-yellow-700';
+    } else {
+        toast.className += ' bg-blue-100 border border-blue-400 text-blue-700';
+    }
+    
+    toast.innerHTML = `
+        <div class="flex items-center">
+            <i class="fa-solid fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-gray-500 hover:text-gray-700">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Animar entrada
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 300);
+    }, 5000);
+}
+
+// Función para obtener CSRF token
+function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    return '';
+}
+
+// Advertencia antes de salir si hay cambios sin guardar
+window.addEventListener('beforeunload', function(e) {
+    if (unsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// Cargar resúmenes iniciales al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar resúmenes para todos los grupos
+    {% for group in groups %}
+    fetch(`/security/group-permissions/ajax/group/{{ group.id }}/summary/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.modules_count > 0) {
+                const groupSummary = document.getElementById('group-summary-{{ group.id }}');
+                if (groupSummary) {
+                    groupSummary.innerHTML = `${data.modules_count}M, ${data.total_permissions}P`;
+                }
+            }
+        })
+        .catch(error => console.error('Error loading group summary:', error));
+    {% endfor %}
+});
+</script>
+
+{% endblock %}

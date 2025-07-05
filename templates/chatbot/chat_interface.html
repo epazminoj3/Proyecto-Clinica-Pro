@@ -1,0 +1,629 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }} - Sistema Clínico{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    
+    .chat-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .chat-status {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9em;
+    }
+    
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #28a745;
+        animation: pulse 2s infinite;
+    }
+    
+    .status-indicator.offline {
+        background: #dc3545;
+        animation: none;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: white;
+    }
+    
+    .message {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .message.user {
+        flex-direction: row-reverse;
+    }
+    
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .message.user .message-avatar {
+        background: #007bff;
+        color: white;
+    }
+    
+    .message.bot .message-avatar {
+        background: #28a745;
+        color: white;
+    }
+    
+    .message-content {
+        max-width: 70%;
+        padding: 15px;
+        border-radius: 18px;
+        word-wrap: break-word;
+    }
+    
+    .message.user .message-content {
+        background: #007bff;
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .message.bot .message-content {
+        background: #f1f3f4;
+        color: #333;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .message-time {
+        font-size: 0.8em;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .message.user .message-time {
+        text-align: right;
+        color: rgba(255,255,255,0.8);
+    }
+    
+    .chat-input-container {
+        padding: 20px;
+        background: white;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .chat-input-form {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .chat-input {
+        flex: 1;
+        border: 1px solid #ced4da;
+        border-radius: 25px;
+        padding: 12px 20px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+    
+    .chat-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    
+    .chat-send-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .chat-send-btn:hover {
+        background: #0056b3;
+        transform: scale(1.05);
+    }
+    
+    .chat-send-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 10px 15px;
+        background: #f1f3f4;
+        border-radius: 18px;
+        margin: 10px 0;
+        width: fit-content;
+    }
+    
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+    }
+    
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: typing 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes typing {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+    
+    .action-button {
+        background: #007bff !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 20px !important;
+        padding: 10px 20px !important;
+        margin: 15px 5px 5px 0 !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        transition: all 0.3s !important;
+        display: inline-block !important;
+        text-decoration: none !important;
+        box-shadow: 0 2px 4px rgba(0,123,255,0.3) !important;
+    }
+    
+    .action-button:hover {
+        background: #0056b3 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0,123,255,0.4) !important;
+    }
+    
+    .ia-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px;
+        color: #856404;
+    }
+    
+    .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 15px;
+    }
+    
+    .suggestion-chip {
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .suggestion-chip:hover {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="chat-container">
+                <!-- Header del Chat -->
+                <div class="chat-header">
+                    <div>
+                        <h5 class="mb-1">🤖 {{ titulo }}</h5>
+                        <div class="chat-status">
+                            <span class="status-indicator {% if not ia_disponible %}offline{% endif %}"></span>
+                            <small id="status-text">
+                                {% if ia_disponible %}
+                                IA Conectada - Ollama funcionando
+                                {% else %}
+                                IA Desconectada - Instala Ollama
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área de Mensajes -->
+                <div class="chat-messages" id="chat-messages">
+                    {% if not ia_disponible %}
+                    <div class="ia-warning">
+                        <h6>🚨 Asistente IA no disponible</h6>
+                        <p>Para usar el chatbot inteligente, necesitas instalar Ollama:</p>
+                        <ol>
+                            <li>Descarga Ollama desde: <a href="https://ollama.ai" target="_blank">https://ollama.ai</a></li>
+                            <li>Instala el programa en tu computadora</li>
+                            <li>Abre terminal y ejecuta: <code>ollama pull llama3.1:8b</code></li>
+                            <li>Recarga esta página</li>
+                        </ol>
+                        <p><strong>¡Es completamente gratis y funciona sin internet!</strong></p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mensaje de bienvenida -->
+                    <div class="message bot">
+                        <div class="message-avatar">🤖</div>
+                        <div class="message-content">
+                            <div>¡Hola! Soy tu asistente médico inteligente. 👋</div>
+                            <div class="message-time">Ahora</div>
+                            
+                            <div class="suggestion-chips">
+                                <span class="suggestion-chip" onclick="enviarSugerencia('Quiero agendar una cita')">📅 Agendar cita</span>
+                                <span class="suggestion-chip" onclick="enviarSugerencia('Registrar nuevo paciente')">👤 Nuevo paciente</span>
+                                <span class="suggestion-chip" onclick="enviarSugerencia('Ver horarios disponibles')">⏰ Ver horarios</span>
+                                <span class="suggestion-chip" onclick="enviarSugerencia('Consultar medicamentos')">💊 Medicamentos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicador de escritura -->
+                    <div class="typing-indicator" id="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input del Chat -->
+                <div class="chat-input-container">
+                    <form class="chat-input-form" id="chat-form">
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="chat-input" 
+                            placeholder="Escribe tu mensaje... ej: 'Quiero cita con Dr. García mañana 2pm'"
+                            autocomplete="off"
+                            {% if not ia_disponible %}disabled{% endif %}
+                        >
+                        <button 
+                            type="submit" 
+                            class="chat-send-btn" 
+                            id="send-btn"
+                            {% if not ia_disponible %}disabled{% endif %}
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class ChatbotInterface {
+    constructor() {
+        this.chatMessages = document.getElementById('chat-messages');
+        this.chatForm = document.getElementById('chat-form');
+        this.chatInput = document.getElementById('chat-input');
+        this.sendBtn = document.getElementById('send-btn');
+        this.typingIndicator = document.getElementById('typing-indicator');
+        
+        this.init();
+    }
+    
+    init() {
+        this.chatForm.addEventListener('submit', (e) => this.enviarMensaje(e));
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.enviarMensaje(e);
+            }
+        });
+        
+        // Verificar estado de IA cada 30 segundos
+        setInterval(() => this.verificarEstadoIA(), 30000);
+    }
+    
+    async enviarMensaje(event) {
+        event.preventDefault();
+        
+        const mensaje = this.chatInput.value.trim();
+        if (!mensaje) return;
+        
+        // Mostrar mensaje del usuario
+        this.agregarMensaje(mensaje, 'user');
+        this.chatInput.value = '';
+        this.toggleEnvio(false);
+        this.mostrarTyping(true);
+        
+        try {
+            const response = await fetch('/chatbot/api/mensaje/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ mensaje: mensaje })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en el servidor');
+            }
+            
+            this.procesarRespuestaIA(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            this.agregarMensaje(
+                'Lo siento, ocurrió un error. Por favor, intenta de nuevo. 😔', 
+                'bot'
+            );
+        } finally {
+            this.mostrarTyping(false);
+            this.toggleEnvio(true);
+        }
+    }
+    
+    procesarRespuestaIA(data) {
+        let contenido = data.respuesta;
+        
+        // DEBUG: Verificar URL antes de procesar
+        console.log('🔍 DEBUG - procesarRespuestaIA:', true);
+        console.log('🔍 DEBUG - URL recibida del backend:', data.formulario_url);
+        console.log('🔍 DEBUG - formulario_url:', !!data.formulario_url);
+        console.log('🔍 DEBUG - Datos completos:', data);
+        
+        // Agregar botones de acción si aplica
+        if (data.formulario_url) {
+            // DEBUG: Verificar URL antes de construir botón
+            console.log('🔍 DEBUG - action-button:', true);
+            console.log('🔍 DEBUG - Construyendo botón con URL:', data.formulario_url);
+            
+            // Determinar el texto del botón según el tipo de consulta
+            let textoBoton = "📋 Ver Detalles";
+            let iconoBoton = "📋";
+            
+            if (data.formulario_url.includes('/doctor/cita_medica/')) {
+                if (data.formulario_url.includes('?fecha=')) {
+                    textoBoton = "📅 Ver Citas de la Fecha";
+                    iconoBoton = "📅";
+                } else {
+                    textoBoton = "📅 Ver Todas las Citas";
+                    iconoBoton = "📅";
+                }
+            } else if (data.formulario_url.includes('/core/pacientes/')) {
+                textoBoton = "👥 Ver Pacientes";
+                iconoBoton = "👥";
+            } else if (data.formulario_url.includes('/core/doctores/')) {
+                textoBoton = "👨‍⚕️ Ver Doctores";
+                iconoBoton = "👨‍⚕️";
+            } else if (data.formulario_url.includes('/core/medicamentos/')) {
+                textoBoton = "💊 Ver Medicamentos";
+                iconoBoton = "💊";
+            } else if (data.formulario_url.includes('/core/especialidades/')) {
+                textoBoton = "🏥 Ver Especialidades";
+                iconoBoton = "🏥";
+            } else if (data.accion === 'consulta_bd') {
+                textoBoton = "🔍 Ver Detalles";
+                iconoBoton = "🔍";
+            }
+            
+            console.log('🔍 DEBUG - Texto del botón:', textoBoton);
+            
+            const botonHtml = `
+                <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #007bff;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: #007bff;">💡 Acción Disponible:</p>
+                    <button class="action-button" onclick="abrirFormulario('${data.formulario_url}', ${JSON.stringify(data.datos).replace(/"/g, '&quot;')})">
+                        ${iconoBoton} ${textoBoton}
+                    </button>
+                </div>
+            `;
+            
+            console.log('🔍 DEBUG - HTML del botón generado:', botonHtml);
+            contenido += botonHtml;
+        } else {
+            console.log('🔍 DEBUG - No se generó botón (formulario_url es null/undefined)');
+        }
+        
+        // Mostrar campos faltantes si los hay
+        if (data.campos_faltantes && data.campos_faltantes.length > 0) {
+            contenido += `
+                <div style="margin-top: 10px; font-size: 0.9em; color: #856404;">
+                    💡 Campos pendientes: ${data.campos_faltantes.join(', ')}
+                </div>
+            `;
+        }
+        
+        this.agregarMensaje(contenido, 'bot');
+    }
+    
+    agregarMensaje(contenido, tipo) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${tipo}`;
+        
+        const avatar = tipo === 'user' ? '👤' : '🤖';
+        const tiempo = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.innerHTML = `
+            <div class="message-avatar">${avatar}</div>
+            <div class="message-content">
+                <div>${contenido}</div>
+                <div class="message-time">${tiempo}</div>
+            </div>
+        `;
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+    }
+    
+    mostrarTyping(mostrar) {
+        this.typingIndicator.style.display = mostrar ? 'block' : 'none';
+        if (mostrar) this.scrollToBottom();
+    }
+    
+    toggleEnvio(habilitar) {
+        this.sendBtn.disabled = !habilitar;
+        this.chatInput.disabled = !habilitar;
+    }
+    
+    scrollToBottom() {
+        setTimeout(() => {
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        }, 100);
+    }
+    
+    async verificarEstadoIA() {
+        try {
+            const response = await fetch('/chatbot/api/estado/');
+            const data = await response.json();
+            
+            const statusIndicator = document.querySelector('.status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            if (data.disponible) {
+                statusIndicator.classList.remove('offline');
+                statusText.textContent = 'IA Conectada - Groq funcionando';
+                this.toggleEnvio(true);
+            } else {
+                statusIndicator.classList.add('offline');
+                
+                // Mostrar mensaje específico según el tipo de error
+                if (data.detalles && data.detalles.tipo_error === 'tokens_agotados') {
+                    statusText.textContent = '⚠️ IA Desconectada - Tokens diarios agotados';
+                    this.mostrarMensajeTokensAgotados(data.detalles);
+                } else {
+                    statusText.textContent = 'IA Desconectada - Revisa configuración';
+                }
+                
+                this.toggleEnvio(false);
+            }
+        } catch (error) {
+            console.warn('No se pudo verificar estado de IA:', error);
+            const statusIndicator = document.querySelector('.status-indicator');
+            const statusText = document.getElementById('status-text');
+            statusIndicator.classList.add('offline');
+            statusText.textContent = 'IA Desconectada - Error de conexión';
+            this.toggleEnvio(false);
+        }
+    }
+    
+    mostrarMensajeTokensAgotados(detalles) {
+        // Crear mensaje informativo sobre tokens agotados
+        const mensaje = `
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 15px; margin: 10px 0;">
+                <h4 style="color: #856404; margin: 0 0 10px 0;">⚠️ Tokens Diarios Agotados</h4>
+                <p style="margin: 5px 0; color: #856404;">
+                    El asistente IA ha alcanzado el límite diario de consultas. Los tokens se resetean automáticamente cada 24 horas.
+                </p>
+                <p style="margin: 5px 0; color: #856404; font-size: 0.9em;">
+                    📊 Tokens restantes: ${detalles.tokens_restantes || 0} de ${detalles.limite_diario || 14000}
+                </p>
+            </div>
+        `;
+        
+        this.agregarMensaje(mensaje, 'bot');
+    }
+    
+    getCsrfToken() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfToken ? csrfToken.value : '';
+    }
+}
+
+// Funciones globales
+function enviarSugerencia(texto) {
+    const chatInput = document.getElementById('chat-input');
+    chatInput.value = texto;
+    document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+}
+
+function abrirFormulario(url, datos) {
+    // DEBUG: Verificar URL recibida
+    console.log('🔍 DEBUG - abrirFormulario:', true);
+    console.log('🔍 DEBUG - URL recibida en abrirFormulario:', url);
+    console.log('🔍 DEBUG - Datos recibidos:', datos);
+    
+    // Si la URL ya tiene parámetros (como ?fecha=), usarla directamente
+    if (url.includes('?')) {
+        console.log('🔍 DEBUG - URL ya tiene parámetros, usando directamente');
+        console.log('🔍 DEBUG - Abriendo URL:', url);
+        window.open(url, '_blank');
+        return;
+    }
+    
+    // Construir URL con parámetros solo si no los tiene
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(datos)) {
+        if (value && value.toString().trim()) {
+            params.append(key, value);
+        }
+    }
+    
+    const urlCompleta = url + (params.toString() ? '?' + params.toString() : '');
+    
+    // DEBUG: Verificar URL final
+    console.log('🔍 DEBUG - URL final a abrir:', urlCompleta);
+    
+    // Mostrar confirmación visual
+    if (confirm(`¿Abrir página de citas médicas?\n\nURL: ${urlCompleta}`)) {
+        window.open(urlCompleta, '_blank');
+    }
+}
+
+// Inicializar cuando cargue la página
+document.addEventListener('DOMContentLoaded', function() {
+    new ChatbotInterface();
+});
+</script>
+{% endblock %}

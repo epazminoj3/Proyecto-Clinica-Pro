@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Control - Sistema Multi-Key{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-cogs"></i> Panel de Control - Sistema Multi-Key Groq
+                    </h4>
+                    <small class="text-muted">
+                        Última actualización: {{ timestamp }}
+                    </small>
+                </div>
+                
+                <div class="card-body">
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <h5>{{ error }}</h5>
+                            <p>{{ mensaje }}</p>
+                        </div>
+                    {% else %}
+                        
+                        <!-- Resumen General -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Total Keys</h5>
+                                        <h2>{{ estado.total_keys }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Key Actual</h5>
+                                        <h2>#{{ estado.key_actual }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Tokens Disponibles</h5>
+                                        <h2>{{ estado.total_tokens_disponibles }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Sistema</h5>
+                                        <h6>{{ estado.sistema|default:"MultiGroq" }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado de API Keys -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Estado de API Keys</h5>
+                                <button id="refresh-status" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-sync-alt"></i> Actualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Key #</th>
+                                                <th>Estado</th>
+                                                <th>Tokens Usados</th>
+                                                <th>Tokens Restantes</th>
+                                                <th>% Uso</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="keys-table-body">
+                                            {% for key_info in estado.keys %}
+                                            <tr class="{% if key_info.activa %}table-success{% endif %}">
+                                                <td>
+                                                    <strong>{{ key_info.key_number }}</strong>
+                                                    {% if key_info.activa %}
+                                                        <span class="badge badge-success">ACTIVA</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if key_info.disponible %}
+                                                        <span class="text-success">
+                                                            <i class="fas fa-check-circle"></i> Disponible
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="text-danger">
+                                                            <i class="fas fa-times-circle"></i> Agotada
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ key_info.tokens_usados }}</td>
+                                                <td>{{ key_info.tokens_restantes }}</td>
+                                                <td>
+                                                    <div class="progress" style="height: 20px;">
+                                                        <div class="progress-bar {% if key_info.porcentaje_uso > 80 %}bg-danger{% elif key_info.porcentaje_uso > 60 %}bg-warning{% else %}bg-success{% endif %}"
+                                                            role="progressbar" 
+                                                            style="width: {{ key_info.porcentaje_uso }}%">
+                                                            {{ key_info.porcentaje_uso }}%
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if not key_info.activa %}
+                                                        <button class="btn btn-sm btn-primary cambiar-key" 
+                                                                data-key-index="{{ key_info.key_number|add:"-1" }}">
+                                                            Activar
+                                                        </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Acciones de Administración -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5>Acciones de Administración</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <button id="test-all-keys" class="btn btn-info btn-block">
+                                            <i class="fas fa-vial"></i> Probar Todas las Keys
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button id="reset-usage" class="btn btn-warning btn-block">
+                                            <i class="fas fa-redo"></i> Resetear Uso Diario
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para el panel -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Función para actualizar estado
+    function actualizarEstado() {
+        fetch('/chatbot/api/admin/status/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload(); // Recargar para mostrar datos actualizados
+            } else {
+                alert('Error actualizando estado: ' + data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al actualizar estado');
+        });
+    }
+    
+    // Función para cambiar API key
+    function cambiarApiKey(keyIndex) {
+        if (!confirm(`¿Estás seguro de cambiar a la API key #${keyIndex + 1}?`)) {
+            return;
+        }
+        
+        fetch('/chatbot/api/admin/cambiar-key/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                key_index: keyIndex
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.mensaje);
+                location.reload();
+            } else {
+                alert('Error: ' + data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al cambiar API key');
+        });
+    }
+    
+    // Event listeners
+    document.getElementById('refresh-status').addEventListener('click', actualizarEstado);
+    
+    document.querySelectorAll('.cambiar-key').forEach(button => {
+        button.addEventListener('click', function() {
+            const keyIndex = parseInt(this.dataset.keyIndex);
+            cambiarApiKey(keyIndex);
+        });
+    });
+    
+    document.getElementById('test-all-keys').addEventListener('click', function() {
+        alert('Función de prueba en desarrollo');
+    });
+    
+    document.getElementById('reset-usage').addEventListener('click', function() {
+        if (confirm('¿Estás seguro de resetear el uso diario de todas las keys?')) {
+            alert('Función de reset en desarrollo');
+        }
+    });
+    
+    // Auto-refresh cada 30 segundos
+    setInterval(actualizarEstado, 30000);
+});
+</script>
+
+{% endblock %}

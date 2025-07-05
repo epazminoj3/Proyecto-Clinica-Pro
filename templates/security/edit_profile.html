@@ -1,0 +1,134 @@
+{% extends 'home.html' %} 
+{% load static %}
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<style>
+.btn-verde-pastel {
+  background-color: #b9f5d0 !important;
+  color: #14532d !important;
+  border: 2px solid #43d18d !important;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-verde-pastel:hover, .btn-verde-pastel:focus {
+  background-color: #43d18d !important;
+  color: #fff !important;
+  border-color: #36b87a !important;
+  box-shadow: 0 4px 16px 0 #b9f5d0aa;
+}
+#userDropdown, #userDropdown:focus, #userDropdown:hover, #userDropdown:active {
+  transition: none !important;
+  transform: none !important;
+  scale: 1 !important;
+}
+.fade-in {
+  animation: fadeIn 0.7s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+.input-label {
+  font-weight: 600;
+  color: #14532d;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.input-group {
+  margin-bottom: 1.5rem;
+}
+input, select, textarea {
+  border-radius: 0.75rem;
+  border: 1.5px solid #b9f5d0;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  background: #f8fafc;
+  color: #14532d;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: #43d18d;
+  outline: none;
+  box-shadow: 0 0 0 2px #b9f5d0;
+}
+input[type="file"] {
+  background: transparent;
+  color: #14532d;
+  padding: 0.5rem 0;
+}
+.help-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.2rem;
+}
+.error-text {
+  font-size: 0.85rem;
+  color: #dc2626;
+  margin-top: 0.2rem;
+}
+</style>
+
+<div class="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mt-12 fade-in border border-gray-200 dark:border-gray-700">
+  <div class="flex flex-col items-center mb-6">
+    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center text-3xl font-bold text-green-900 shadow mb-2">
+      {{ user.first_name|default:user.username|slice:":1"|upper }}
+    </div>
+    <h2 class="text-xl font-bold mb-1">Editar Perfil</h2>
+    <span class="text-gray-500 dark:text-gray-300 text-sm">{{ user.email }}</span>
+  </div>
+
+  {% if form.errors %}
+    <div class="mb-4 p-3 rounded-lg bg-red-100 text-red-700 border border-red-300">
+      <strong>Corrige los siguientes errores:</strong>
+      <ul class="list-disc ml-6 mt-1">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-2">
+    {% csrf_token %}
+    {% for field in form %}
+      {# Solo mostrar campos permitidos, nunca los críticos ni los de permisos #}
+      {% if field.name in 'username email first_name last_name dni phone direction image' %}
+      <div class="input-group">
+        <label for="{{ field.id_for_label }}" class="input-label">
+          {% if field.name == 'username' %}<i class="fas fa-user"></i>Nombre de Usuario{% endif %}
+          {% if field.name == 'email' %}<i class="fas fa-envelope"></i>Correo Electrónico{% endif %}
+          {% if field.name == 'first_name' %}<i class="fas fa-user-tag"></i>Nombre{% endif %}
+          {% if field.name == 'last_name' %}<i class="fas fa-user-tag"></i>Apellido{% endif %}
+          {% if field.name == 'dni' %}<i class="fas fa-id-card"></i>Cédula o RUC{% endif %}
+          {% if field.name == 'phone' %}<i class="fas fa-phone"></i>Teléfono{% endif %}
+          {% if field.name == 'direction' %}<i class="fas fa-map-marker-alt"></i>Dirección{% endif %}
+          {% if field.name == 'image' %}<i class="fas fa-image"></i>Foto de Perfil{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}
+          <p class="help-text">{{ field.help_text }}</p>
+        {% endif %}
+        {% for error in field.errors %}
+          <p class="error-text">{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="flex items-center justify-center gap-4 mt-6">
+      <button type="submit" class="px-6 py-2 rounded-xl font-semibold shadow btn-verde-pastel focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200 flex items-center gap-2">
+        <i class="fas fa-save"></i> Guardar cambios
+      </button>
+      <a href="{% url 'security:profile' %}" class="text-primary hover:underline text-sm">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

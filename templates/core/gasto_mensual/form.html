@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}{% if form.instance.pk %}Editar Gasto Mensual{% else %}Añadir Gasto Mensual{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% if form.instance.pk %}Editar Gasto Mensual{% else %}Añadir Gasto Mensual{% endif %}
+                    </h1>
+                    <p class="text-gray-600 mt-1">
+                        {% if form.instance.pk %}Modifique los datos del gasto{% else %}Complete la información del nuevo gasto{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'core:gasto_mensual_list' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Volver
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-lg">
+            <form method="post" class="space-y-6 p-6">
+                {% csrf_token %}
+                
+                <!-- Sección de Información Personal -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Información Personal
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Responsable -->
+                        <div>
+                            <label for="{{ form.responsable.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Responsable:
+                            </label>
+                            {{ form.responsable }}
+                            {% if form.responsable.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.responsable.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.responsable.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.responsable.help_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Departamento -->
+                        <div>
+                            <label for="{{ form.departamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Departamento:
+                            </label>
+                            {{ form.departamento }}
+                            {% if form.departamento.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.departamento.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.departamento.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.departamento.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección de Información del Gasto -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                        Información del Gasto
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Tipo de Gasto -->
+                        <div>
+                            <label for="{{ form.tipo_gasto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tipo de Gasto:
+                                {% if form.tipo_gasto.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.tipo_gasto }}
+                            {% if form.tipo_gasto.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.tipo_gasto.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Fecha del Gasto -->
+                        <div>
+                            <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Fecha del Gasto:
+                                {% if form.fecha.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.fecha.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.fecha.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.fecha.help_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Valor del Gasto -->
+                        <div>
+                            <label for="{{ form.valor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Valor del Gasto:
+                                {% if form.valor.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                </div>
+                                {{ form.valor }}
+                            </div>
+                            {% if form.valor.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.valor.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.valor.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.valor.help_text }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Observación -->
+                        <div>
+                            <label for="{{ form.observacion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Observación:
+                            </label>
+                            {{ form.observacion }}
+                            {% if form.observacion.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.observacion.errors.0 }}</div>
+                            {% endif %}
+                            {% if form.observacion.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.observacion.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="pt-6 border-t border-gray-200">
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'core:gasto_mensual_list' %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors duration-200">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

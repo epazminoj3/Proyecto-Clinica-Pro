@@ -1,0 +1,73 @@
+{% extends 'home.html' %} 
+{% load static %}
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<style>
+.btn-verde-pastel {
+  background-color: #b9f5d0 !important;
+  color: #14532d !important;
+  border: 2px solid #43d18d !important;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+}
+.btn-verde-pastel:hover, .btn-verde-pastel:focus {
+  background-color: #43d18d !important;
+  color: #fff !important;
+  border-color: #36b87a !important;
+  box-shadow: 0 4px 16px 0 #b9f5d0aa;
+}
+.card-perfil {
+  background-color: #f0fdf4;
+  border: 2px solid #bbf7d0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+.card-perfil h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.card-perfil p {
+  font-size: 1rem;
+  color: #1f2937;
+  margin-left: 1.5rem;
+}
+</style>
+
+<div class="max-w-xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mt-12 border border-gray-200 dark:border-gray-700">
+  <div class="flex flex-col items-center mb-8">
+    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center text-4xl font-bold text-green-900 shadow-lg mb-2">
+      {{ user.first_name|default:user.username|slice:":1"|upper }}
+    </div>
+    <h2 class="text-2xl font-bold mb-1">{{ user.get_full_name|default:user.username }}</h2>
+    <span class="text-gray-500 dark:text-gray-300 text-sm">{{ user.email }}</span>
+  </div>
+
+  <div class="card-perfil">
+    <h3><i class="fas fa-user"></i> Usuario:</h3>
+    <p>{{ user.username }}</p>
+  </div>
+
+  <div class="card-perfil">
+    <h3><i class="fas fa-id-card"></i> Nombre completo:</h3>
+    <p>{{ user.get_full_name }}</p>
+  </div>
+
+  <div class="card-perfil">
+    <h3><i class="fas fa-envelope"></i> Email:</h3>
+    <p>{{ user.email }}</p>
+  </div>
+
+  <div class="mt-4 flex justify-center">
+    <a href="{% url 'security:edit_profile' %}" class="inline-flex items-center gap-2 px-6 py-2 rounded-xl font-semibold shadow btn-verde-pastel focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200">
+      <i class="fas fa-user-edit"></i>Editar perfil
+    </a>
+  </div>
+</div>
+{% endblock %}

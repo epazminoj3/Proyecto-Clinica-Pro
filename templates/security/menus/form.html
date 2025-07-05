@@ -1,0 +1,852 @@
+{% extends 'home.html' %} 
+<title>{% block title %}{{title}}{% endblock %}</title>
+{% load static %}
+{% block content %}
+<section class="dark:bg-principal">
+    <div class="text-center" data-aos="fade" data-aos-delay="200">
+        <div class="sm:pt-28 lg:pt-4">
+             <h1 class="rounded-2xl  bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+                {{ title1 }}
+             </h1>
+        </div>
+
+        <!-- Mensajes de error del formulario (no específicos de campo) -->
+        {% if form.non_field_errors %}
+        <div class="mx-4 lg:mx-20 mb-6" data-aos="fade-up">
+            <div class="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-lg max-w-4xl mx-auto">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-triangle text-red-500 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-red-800 dark:text-red-200 font-medium">
+                            Se encontraron errores en el formulario:
+                        </h3>
+                        <div class="mt-2 text-red-700 dark:text-red-300">
+                            <ul class="list-disc list-inside space-y-1">
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6 py-4">
+            <div class="mx-4 lg:mx-20" data-aos="fade">
+                <!-- Contenedor principal del formulario -->
+                <div class="bg-white dark:bg-secundario rounded-3xl p-8 max-w-4xl mx-auto"
+                    data-aos="fade-up" data-aos-delay="200">
+                    {% csrf_token %}
+                    
+                    <!-- Vista previa del ícono -->
+                    <div class="text-center mb-8">
+                        <div class="bg-gray-100 dark:bg-principal rounded-full w-20 h-20 mx-auto flex items-center justify-center mb-4">
+                            <i id="iconPreview" class="bi bi-x-octagon text-3xl text-gray-400"></i>
+                        </div>
+                        <h2 class="dark:text-blue-300 text-2xl font-Pacifico">Vista previa del ícono</h2>
+                    </div>
+
+                    <!-- Grid de campos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Primera columna -->
+                        <div class="space-y-6">
+                            <!-- Campo Name -->
+                            <div class="field-container {% if form.name.errors %}has-error{% endif %}">
+                                <label for="{{ form.name.id_for_label }}"
+                                    class="font-black uppercase text-lg block mb-2
+                                           {% if form.name.errors %}text-red-600 dark:text-red-400{% else %}dark:text-blue-300{% endif %}">
+                                    {{ form.name.label }}
+                                    {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                <div class="relative">
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if form.name.errors %}
+                                <div class="mt-2 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in form.name.errors %}
+                                    <div class="flex items-center mt-1">
+                                        <i class="fa-solid fa-circle-exclamation text-xs mr-2"></i>
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            
+
+                       
+                            <!-- Campo Icon con selector visual -->
+                            <div class="field-container {% if form.icon.errors %}has-error{% endif %}">
+                                <label for="{{ form.icon.id_for_label }}"
+                                    class="font-black uppercase text-lg block mb-2
+                                           {% if form.icon.errors %}text-red-600 dark:text-red-400{% else %}dark:text-blue-300{% endif %}">
+                                    {{ form.icon.label }}
+                                    {% if form.icon.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                <div class="relative">
+                                    {{ form.icon }}
+                                    <button type="button" id="openIconSelector" 
+                                        class="absolute inset-y-0 right-0 px-3 flex items-center bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 rounded-r-md border-l border-blue-300 dark:border-blue-700 transition-colors">
+                                        <i class="fa-solid fa-icons"></i>
+                                    </button>
+                                    {% if form.icon.errors %}
+                                    <div class="absolute inset-y-0 right-10 pr-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mt-2 text-gray-600 dark:text-gray-300 text-sm">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-info-circle text-xs mr-2 text-blue-500"></i>
+                                        Haz clic en el botón para seleccionar un ícono
+                                    </div>
+                                </div>
+                                {% if form.icon.errors %}
+                                <div class="mt-2 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in form.icon.errors %}
+                                    <div class="flex items-center mt-1">
+                                        <i class="fa-solid fa-circle-exclamation text-xs mr-2"></i>
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Modal para selección de íconos -->
+                                <div id="iconSelectorModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col" style="height: min(90vh, 650px);">
+                                        <!-- Cabecera fija -->
+                                        <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                            <div class="flex justify-between items-center mb-4">
+                                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Seleccionar Ícono</h3>
+                                                <button id="closeIconSelector" type="button" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                    <i class="fa-solid fa-xmark text-xl"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Buscador -->
+                                            <div class="mb-4">
+                                                <div class="relative">
+                                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                        <i class="fa-solid fa-search text-gray-400"></i>
+                                                    </div>
+                                                    <input type="text" id="iconSearch" placeholder="Buscar íconos..." 
+                                                        class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Categorías -->
+                                            <div class="scrollbar-thin overflow-x-auto pb-2">
+                                                <div class="flex gap-2 min-w-max">
+                                                    <button type="button" data-category="all" class="icon-category-btn active px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-sm font-medium whitespace-nowrap">
+                                                        Todos
+                                                    </button>
+                                                    <button type="button" data-category="fa-solid" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                        Solid
+                                                    </button>
+                                                    <button type="button" data-category="fa-regular" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                        Regular
+                                                    </button>
+                                                    <button type="button" data-category="fa-brands" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                        Marcas
+                                                    </button>
+                                                    <button type="button" data-category="bi" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                        Bootstrap
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Contenedor con scroll para los íconos -->
+                                        <div class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/80 relative flex flex-col">
+                                            <!-- Barra de resultados -->
+                                            <div id="resultsBar" class="p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 text-sm text-gray-600 dark:text-gray-400 flex justify-between z-10">
+                                                <span id="resultCount">Mostrando todos los iconos</span>
+                                                <span class="text-blue-500 dark:text-blue-300">
+                                                    <i class="fa-solid fa-circle-info mr-1"></i>
+                                                    Haz scroll para ver más
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Grid de iconos -->
+                                            <div class="p-5">
+                                                <div id="iconsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                                                    <!-- Los íconos se cargarán aquí -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Footer con indicaciones -->
+                                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 text-center flex-shrink-0">
+                                            <span class="bg-blue-500 text-white px-2 py-1 rounded-full mr-2"><i class="fa-solid fa-mouse-pointer"></i></span>
+                                            Haz clic en un icono para seleccionarlo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tercera columna -->
+                        <div class="space-y-6">
+                            <!-- Campo Order -->
+                            <div class="field-container {% if form.order.errors %}has-error{% endif %}">
+                                <label for="{{ form.order.id_for_label }}"
+                                    class="font-black uppercase text-lg block mb-2
+                                           {% if form.order.errors %}text-red-600 dark:text-red-400{% else %}dark:text-blue-300{% endif %}">
+                                    {{ form.order.label }}
+                                    {% if form.order.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                <div class="relative">
+                                    {{ form.order }}
+                                    {% if form.order.errors %}
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-exclamation-circle text-red-500"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if form.order.errors %}
+                                <div class="mt-2 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in form.order.errors %}
+                                    <div class="flex items-center mt-1">
+                                        <i class="fa-solid fa-circle-exclamation text-xs mr-2"></i>
+                                        {{ error }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex flex-col md:flex-row justify-center items-center mt-8 space-y-3 md:space-y-0 md:space-x-8">
+                        <button type="submit"
+                            class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white py-3 px-10 rounded-full flex items-center justify-center transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:translate-y-[-2px]">
+                            <i class="fa-solid fa-save mr-2"></i>Guardar Menu
+                        </button>
+                        <a class="w-full md:w-auto bg-gray-500 hover:bg-gray-600 text-white py-3 px-10 rounded-full flex items-center justify-center transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:translate-y-[-2px]"
+                            href="{% url 'security:menu_list' %}">
+                            <i class="fa-solid fa-xmark mr-2"></i>Cancelar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- CSS para estilos de error -->
+<style>
+/* Estilos para campos con errores */
+.field-container.has-error input,
+.field-container.has-error select,
+.field-container.has-error textarea {
+    border-color: #ef4444 !important;
+    background-color: rgba(254, 242, 242, 0.5) !important;
+    color: #991b1b !important;
+}
+
+.field-container.has-error input:focus,
+.field-container.has-error select:focus,
+.field-container.has-error textarea:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    outline: none !important;
+}
+
+/* Dark mode para campos con errores */
+@media (prefers-color-scheme: dark) {
+    .field-container.has-error input,
+    .field-container.has-error select,
+    .field-container.has-error textarea {
+        background-color: rgba(153, 27, 27, 0.2) !important;
+        color: #fca5a5 !important;
+        border-color: #ef4444 !important;
+    }
+    
+    .field-container.has-error input:focus,
+    .field-container.has-error select:focus,
+    .field-container.has-error textarea:focus {
+        box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.4) !important;
+    }
+}
+
+/* Estilos para checkboxes con errores */
+.field-container.has-error input[type="checkbox"] {
+    border-color: #ef4444 !important;
+    accent-color: #ef4444 !important;
+}
+
+/* Animación sutil para errores */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+    20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+.field-container.has-error {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Estilos para el selector de iconos */
+.icon-button {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    transform: translateY(-2px);
+    border-color: #93c5fd;
+    background-color: #eff6ff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.icon-button.selected {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+}
+
+#iconSelectorModal {
+    backdrop-filter: blur(8px);
+}
+
+#iconSearch {
+    transition: all 0.2s ease;
+}
+/* Agregar a tus estilos CSS */
+html {
+    scroll-behavior: auto !important;
+}
+
+input, select, textarea {
+    scroll-margin: 50vh; /* Ajusta el margen de desplazamiento */
+}
+
+#iconSearch:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+    outline: none;
+}
+
+/* Estilos para scrollbar personalizado */
+.scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Ajustar grid según tamaño de pantalla */
+#iconsGrid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (min-width: 450px) {
+    #iconsGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 640px) {
+    #iconsGrid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    #iconsGrid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    #iconsGrid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+/* Animación para modal */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#iconSelectorModal > div {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para prevenir scroll mientras el modal está abierto */
+html.no-scroll {
+    position: fixed;
+    overflow-y: hidden;
+    width: 100%;
+}
+
+/* Asegurar que el modal no cause desplazamiento */
+#iconSelectorModal {
+    position: fixed;
+    overscroll-behavior: contain;
+    overscroll-behavior-y: contain;
+    z-index: 9999;
+}
+</style>
+
+<script>
+// Vista previa del ícono y selector visual
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevenir scroll automático en todos los campos del formulario
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function(e) {
+            // Preventivo: guardar la posición actual antes de cualquier movimiento
+            const scrollPos = window.scrollY;
+            
+            // Prevenir el comportamiento predeterminado del navegador
+            e.preventDefault();
+            
+            // Restaurar la posición después de un breve retraso
+            setTimeout(() => {
+                window.scrollTo({
+                    top: scrollPos,
+                    behavior: 'auto' // Importante: usar 'auto' en lugar de 'smooth'
+                });
+            }, 10);
+            
+            // Negar el evento focus nativo con setTimeout
+            setTimeout(() => {
+                // Asegurarse de que el elemento sigue teniendo el foco
+                if (document.activeElement !== this) {
+                    this.focus({preventScroll: true});
+                }
+            }, 20);
+        }, {capture: true});
+        
+        // Prevenir también en mousedown que puede causar scroll
+        input.addEventListener('mousedown', function(e) {
+            // Guardar la posición antes del clic
+            window.lastScrollPosition = window.scrollY;
+        });
+        
+        // Restaurar después de mouseup
+        input.addEventListener('mouseup', function(e) {
+            if (typeof window.lastScrollPosition !== 'undefined') {
+                setTimeout(() => {
+                    window.scrollTo(0, window.lastScrollPosition);
+                }, 0);
+            }
+        });
+    });
+    
+    // Prevenir cualquier comportamiento de scroll automático en todo el documento
+    document.addEventListener('scroll', function(e) {
+        if (document.getElementById('iconSelectorModal') && 
+            !document.getElementById('iconSelectorModal').classList.contains('hidden')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, { capture: true });
+    
+    // Prevenir scroll automático cuando los inputs reciben focus
+    const allInputs = document.querySelectorAll('input, select, textarea');
+    allInputs.forEach(input => {
+        input.addEventListener('focus', function(e) {
+            // Guardar la posición actual de scroll
+            const scrollPos = window.scrollY;
+            
+            // Restaurar después de un breve retraso
+            setTimeout(() => {
+                window.scrollTo(0, scrollPos);
+            }, 0);
+        });
+    });
+    // Referencias a elementos DOM y otras declaraciones iniciales
+    const iconInput = document.getElementById('{{ form.icon.id_for_label }}');
+    const iconPreview = document.getElementById('iconPreview');
+    const openSelectorBtn = document.getElementById('openIconSelector');
+    const closeSelectorBtn = document.getElementById('closeIconSelector');
+    const iconSelectorModal = document.getElementById('iconSelectorModal');
+    const iconsGrid = document.getElementById('iconsGrid');
+    const iconSearch = document.getElementById('iconSearch');
+    const categoryButtons = document.querySelectorAll('.icon-category-btn');
+    
+    // Variable global para guardar la posición de scroll
+    let savedScrollPosition = 0;
+    
+    // Iconos comunes por categoría (se mantiene igual)
+    const iconsByCategory = {
+        'fa-solid': [
+            'fa-solid fa-home', 'fa-solid fa-user', 'fa-solid fa-gear', 'fa-solid fa-users',
+            'fa-solid fa-chart-pie', 'fa-solid fa-chart-line', 'fa-solid fa-file', 'fa-solid fa-calendar',
+            'fa-solid fa-bell', 'fa-solid fa-envelope', 'fa-solid fa-lock', 'fa-solid fa-key',
+            'fa-solid fa-check', 'fa-solid fa-xmark', 'fa-solid fa-plus', 'fa-solid fa-minus',
+            'fa-solid fa-star', 'fa-solid fa-heart', 'fa-solid fa-circle-info', 'fa-solid fa-exclamation',
+            'fa-solid fa-trash', 'fa-solid fa-pen-to-square', 'fa-solid fa-eye', 'fa-solid fa-eye-slash',
+            'fa-solid fa-user-doctor', 'fa-solid fa-hospital', 'fa-solid fa-syringe', 'fa-solid fa-pills',
+            'fa-solid fa-stethoscope', 'fa-solid fa-notes-medical', 'fa-solid fa-bed-pulse', 'fa-solid fa-heart-pulse'
+        ],
+        'fa-regular': [
+            'fa-regular fa-user', 'fa-regular fa-file', 'fa-regular fa-calendar', 'fa-regular fa-bell',
+            'fa-regular fa-envelope', 'fa-regular fa-star', 'fa-regular fa-heart', 'fa-regular fa-circle',
+            'fa-regular fa-square', 'fa-regular fa-bookmark', 'fa-regular fa-clipboard', 'fa-regular fa-chart-bar',
+            'fa-regular fa-comments', 'fa-regular fa-credit-card', 'fa-regular fa-folder', 'fa-regular fa-image'
+        ],
+        'fa-brands': [
+            'fa-brands fa-facebook', 'fa-brands fa-twitter', 'fa-brands fa-instagram', 'fa-brands fa-linkedin',
+            'fa-brands fa-whatsapp', 'fa-brands fa-youtube', 'fa-brands fa-github', 'fa-brands fa-google',
+            'fa-brands fa-apple', 'fa-brands fa-windows', 'fa-brands fa-android', 'fa-brands fa-aws'
+        ],
+        'bi': [
+            'bi bi-person', 'bi bi-house', 'bi bi-gear', 'bi bi-people', 'bi bi-calendar',
+            'bi bi-bell', 'bi bi-envelope', 'bi bi-lock', 'bi bi-key', 'bi bi-check',
+            'bi bi-x', 'bi bi-plus', 'bi bi-dash', 'bi bi-star', 'bi bi-heart',
+            'bi bi-info-circle', 'bi bi-exclamation', 'bi bi-trash', 'bi bi-pencil',
+            'bi bi-eye', 'bi bi-eye-slash', 'bi bi-search', 'bi bi-link'
+        ]
+    };
+    
+    // Función para actualizar la vista previa sin causar scroll
+    function updateIconPreview() {
+        // Guardar la posición actual del scroll
+        const scrollPos = window.scrollY;
+        
+        const iconClass = iconInput.value.trim();
+        if (iconClass) {
+            iconPreview.className = iconClass + ' text-3xl text-blue-600 dark:text-blue-400';
+        } else {
+            iconPreview.className = 'bi bi-x-octagon text-3xl text-gray-400';
+        }
+        
+        // Asegurar que no se mueva el scroll
+        setTimeout(() => window.scrollTo(0, scrollPos), 0);
+    }
+    
+    // Función para cargar iconos en la grid según la categoría
+    function loadIcons(category = 'all', searchTerm = '') {
+        // Mostrar indicador de carga
+        iconsGrid.innerHTML = '';
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'col-span-full text-center py-8 text-gray-500 dark:text-gray-400';
+        loadingIndicator.innerHTML = '<div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div><p class="mt-2">Cargando íconos...</p>';
+        iconsGrid.appendChild(loadingIndicator);
+        
+        setTimeout(() => {
+            // Determinar qué iconos mostrar
+            let iconsToShow = [];
+            if (category === 'all') {
+                Object.values(iconsByCategory).forEach(icons => {
+                    iconsToShow = [...iconsToShow, ...icons];
+                });
+            } else {
+                iconsToShow = iconsByCategory[category] || [];
+            }
+            
+            // Filtrar por término de búsqueda si existe
+            if (searchTerm) {
+                iconsToShow = iconsToShow.filter(icon => 
+                    icon.toLowerCase().includes(searchTerm.toLowerCase()));
+            }
+            
+            // Limpiar la grid
+            iconsGrid.innerHTML = '';
+            
+            // Crear elementos para cada icono
+            iconsToShow.forEach(icon => {
+                const iconBtn = document.createElement('button');
+                iconBtn.type = 'button';
+                iconBtn.className = 'icon-button p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors';
+                iconBtn.dataset.iconClass = icon;
+                
+                const iconElement = document.createElement('i');
+                iconElement.className = `${icon} text-2xl mb-2 text-gray-700 dark:text-gray-200`;
+                
+                const iconText = document.createElement('span');
+                iconText.className = 'text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center';
+                iconText.textContent = icon.split(' ').slice(1).join(' ');
+                
+                iconBtn.appendChild(iconElement);
+                iconBtn.appendChild(iconText);
+                iconsGrid.appendChild(iconBtn);
+                
+                // Evento click para seleccionar un icono
+                iconBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Aplicar el icono seleccionado y cerrar primero, luego actualizar preview
+                    iconInput.value = icon;
+                    
+                    // Cerrar el modal primero
+                    closeIconModal();
+                    
+                    // Actualizar vista previa después de un pequeño retraso
+                    setTimeout(() => {
+                        updateIconPreview();
+                    }, 100);
+                });
+            });
+            
+            // Mensaje si no hay iconos que coincidan
+            if (iconsToShow.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'col-span-full text-center py-8 text-gray-500 dark:text-gray-400';
+                noResults.innerHTML = `
+                    <i class="fa-solid fa-search text-3xl mb-2 opacity-50"></i>
+                    <p>No se encontraron iconos que coincidan con "${searchTerm}"</p>
+                    <button id="resetIconSearch" class="mt-2 px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded-lg hover:bg-blue-200">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Mostrar todos
+                    </button>
+                `;
+                iconsGrid.appendChild(noResults);
+                
+                // Agregar evento para resetear la búsqueda
+                document.getElementById('resetIconSearch').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    iconSearch.value = '';
+                    const activeCategory = document.querySelector('.icon-category-btn.active').dataset.category;
+                    loadIcons(activeCategory, '');
+                });
+            }
+            
+            // Actualizar barra de resultados
+            const resultCount = document.getElementById('resultCount');
+            if (resultCount) {
+                const totalIcons = iconsToShow.length;
+                let categoryText = '';
+                
+                if (category === 'all') categoryText = 'todos los iconos';
+                else if (category === 'fa-solid') categoryText = 'iconos Solid';
+                else if (category === 'fa-regular') categoryText = 'iconos Regular';
+                else if (category === 'fa-brands') categoryText = 'iconos de Marcas';
+                else if (category === 'bi') categoryText = 'iconos de Bootstrap';
+                
+                if (searchTerm) {
+                    resultCount.textContent = `${totalIcons} resultado${totalIcons !== 1 ? 's' : ''} para "${searchTerm}"`;
+                } else {
+                    resultCount.textContent = `Mostrando ${totalIcons} ${categoryText}`;
+                }
+            }
+            
+            // Resaltar el icono actualmente seleccionado
+            const currentIcon = iconInput.value.trim();
+            if (currentIcon) {
+                const selectedBtn = document.querySelector(`[data-icon-class="${currentIcon}"]`);
+                if (selectedBtn) {
+                    selectedBtn.classList.add('bg-blue-100', 'dark:bg-blue-900/50');
+                    
+                    // Hacer scroll al icono seleccionado solamente dentro del contenedor modal
+                    try {
+                        const modalScrollContainer = document.querySelector('.overflow-y-auto');
+                        if (modalScrollContainer && selectedBtn) {
+                            // Calcular la posición y desplazar solo dentro del contenedor
+                            setTimeout(() => {
+                                const btnTop = selectedBtn.offsetTop;
+                                const containerHeight = modalScrollContainer.clientHeight;
+                                const newScrollTop = btnTop - (containerHeight / 2) + (selectedBtn.clientHeight / 2);
+                                
+                                // Usar scrollTo con comportamiento "auto" para evitar animaciones
+                                modalScrollContainer.scrollTo({
+                                    top: newScrollTop,
+                                    behavior: 'auto'
+                                });
+                            }, 0);
+                        }
+                    } catch (e) {
+                        console.warn("Error al hacer scroll al icono seleccionado:", e);
+                    }
+                }
+            }
+        }, 50);
+    }
+    
+    // Posición de scroll antes de abrir el modal
+    let previousScrollPosition = 0;
+    
+    // Prevenir scroll en toda la página
+    function preventScroll() {
+        const scrollY = window.scrollY || window.pageYOffset;
+        const html = document.documentElement;
+        html.style.position = 'fixed';
+        html.style.top = `-${scrollY}px`;
+        html.style.width = '100%';
+        html.style.overflow = 'hidden';
+        previousScrollPosition = scrollY;
+    }
+    
+    // Permitir scroll en toda la página y restaurar posición
+    function allowScroll() {
+        const html = document.documentElement;
+        const scrollY = previousScrollPosition;
+        html.style.position = '';
+        html.style.top = '';
+        html.style.width = '';
+        html.style.overflow = '';
+        window.scrollTo(0, scrollY);
+    }
+    
+    // Función para abrir el modal del selector
+    function openIconModal(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Almacenar la posición actual y bloquear el scroll
+        preventScroll();
+        
+        // Mostrar el modal
+        iconSelectorModal.classList.remove('hidden');
+        
+        // Establecer el foco en el campo de búsqueda
+        setTimeout(() => iconSearch.focus(), 50);
+        
+        // Cargar iconos
+        loadIcons('all');
+    }
+    
+    // Función para cerrar el modal
+    function closeIconModal() {
+        // Ocultar el modal
+        iconSelectorModal.classList.add('hidden');
+        
+        // Permitir scroll y restaurar posición
+        allowScroll();
+        
+        // Devolver el foco al campo de texto
+        setTimeout(() => {
+            iconInput.focus();
+        }, 50);
+    }
+    
+    // Establecer event listeners
+    openSelectorBtn.addEventListener('click', openIconModal);
+    closeSelectorBtn.addEventListener('click', closeIconModal);
+    
+    // Cerrar modal cuando se hace clic fuera
+    iconSelectorModal.addEventListener('click', function(e) {
+        if (e.target === iconSelectorModal) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeIconModal();
+        }
+    });
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !iconSelectorModal.classList.contains('hidden')) {
+            e.preventDefault();
+            closeIconModal();
+        }
+    });
+    
+    // Prevenir cualquier comportamiento de scroll en el modal
+    iconSelectorModal.addEventListener('scroll', function(e) {
+        e.stopPropagation();
+    }, true);
+    
+    // Capturar eventos de rueda y táctiles en el modal
+    iconSelectorModal.addEventListener('wheel', function(e) {
+        const isScrollableElement = e.target.closest('.overflow-y-auto');
+        if (!isScrollableElement) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // Manejar búsqueda - prevenir cualquier propagación que pueda afectar el scroll
+    iconSearch.addEventListener('input', function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        const searchTerm = this.value.trim();
+        const activeCategory = document.querySelector('.icon-category-btn.active').dataset.category;
+        loadIcons(activeCategory, searchTerm);
+    });
+    
+    // Evitar que la tecla Enter en el campo de búsqueda cause scrolls o envíe el formulario
+    iconSearch.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+    
+    // Manejar cambios de categoría
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Actualizar estilos de los botones
+            categoryButtons.forEach(b => {
+                b.classList.remove('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+                b.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            });
+            this.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            this.classList.add('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+            
+            // Cargar iconos de la categoría seleccionada
+            const category = this.dataset.category;
+            const searchTerm = iconSearch.value.trim();
+            loadIcons(category, searchTerm);
+        });
+    });
+    
+    // Actualizar vista previa cuando cambie el input manualmente (con prevención de scroll)
+    iconInput.addEventListener('input', function(e) {
+        e.stopPropagation();
+        const scrollPos = window.scrollY;
+        updateIconPreview();
+        window.scrollTo(0, scrollPos);
+    });
+    
+    iconInput.addEventListener('change', function(e) {
+        e.stopPropagation();
+        const scrollPos = window.scrollY;
+        updateIconPreview();
+        window.scrollTo(0, scrollPos);
+    });
+    
+    // Inicializar
+    updateIconPreview();
+});
+</script>
+
+{% endblock %}

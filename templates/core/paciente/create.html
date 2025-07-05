@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">{{ title }}</h1>
+        <a href="{% url 'core:paciente_list' %}" 
+           class="bg-white hover:bg-gray-50 text-black border-2 border-gray-400 hover:border-gray-600 px-4 py-2 rounded-lg flex items-center font-medium transition-all duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Volver a la lista
+        </a>
+    </div>
+
+    <!-- Formulario -->
+    <div class="bg-white rounded-lg shadow">
+        <form method="post" enctype="multipart/form-data" class="p-6">
+            {% csrf_token %}
+            
+            <!-- Información Personal -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <i class="fas fa-user mr-2"></i>Información Personal
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.nombres.label }}</label>
+                        {{ form.nombres }}
+                        {% if form.nombres.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.nombres.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.apellidos.label }}</label>
+                        {{ form.apellidos }}
+                        {% if form.apellidos.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.apellidos.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.cedula_ecuatoriana.label }}</label>
+                        {{ form.cedula_ecuatoriana }}
+                        {% if form.cedula_ecuatoriana.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.cedula_ecuatoriana.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.dni.label }}</label>
+                        {{ form.dni }}
+                        {% if form.dni.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.dni.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.fecha_nacimiento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.fecha_nacimiento.label }}</label>
+                        <input type="date" 
+                               name="fecha_nacimiento" 
+                               id="{{ form.fecha_nacimiento.id_for_label }}"
+                               value="{% if object %}{{ object.fecha_nacimiento|date:'Y-m-d' }}{% endif %}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               required>
+                        {% if form.fecha_nacimiento.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.fecha_nacimiento.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.sexo.label }}</label>
+                        {{ form.sexo }}
+                        {% if form.sexo.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.sexo.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.estado_civil.label }}</label>
+                        {{ form.estado_civil }}
+                        {% if form.estado_civil.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.estado_civil.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.tipo_sangre.label }}</label>
+                        {{ form.tipo_sangre }}
+                        {% if form.tipo_sangre.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.tipo_sangre.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <i class="fas fa-phone mr-2"></i>Información de Contacto
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.telefono.label }}</label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.telefono.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.direccion.label }}</label>
+                        {{ form.direccion }}
+                        {% if form.direccion.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.direccion.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.latitud.label }}</label>
+                        {{ form.latitud }}
+                        {% if form.latitud.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.latitud.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.longitud.label }}</label>
+                        {{ form.longitud }}
+                        {% if form.longitud.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.longitud.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historia Clínica -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <i class="fas fa-notes-medical mr-2"></i>Historia Clínica
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.antecedentes_personales.label }}</label>
+                        {{ form.antecedentes_personales }}
+                        {% if form.antecedentes_personales.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.antecedentes_personales.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.antecedentes_quirurgicos.label }}</label>
+                        {{ form.antecedentes_quirurgicos }}
+                        {% if form.antecedentes_quirurgicos.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.antecedentes_quirurgicos.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.antecedentes_familiares.label }}</label>
+                        {{ form.antecedentes_familiares }}
+                        {% if form.antecedentes_familiares.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.antecedentes_familiares.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.alergias.label }}</label>
+                        {{ form.alergias }}
+                        {% if form.alergias.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.alergias.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.medicamentos_actuales.label }}</label>
+                        {{ form.medicamentos_actuales }}
+                        {% if form.medicamentos_actuales.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.medicamentos_actuales.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.habitos_toxicos.label }}</label>
+                        {{ form.habitos_toxicos }}
+                        {% if form.habitos_toxicos.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.habitos_toxicos.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.vacunas.label }}</label>
+                        {{ form.vacunas }}
+                        {% if form.vacunas.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.vacunas.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.antecedentes_gineco_obstetricos.label }}</label>
+                        {{ form.antecedentes_gineco_obstetricos }}
+                        {% if form.antecedentes_gineco_obstetricos.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.antecedentes_gineco_obstetricos.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Foto -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <i class="fas fa-camera mr-2"></i>Foto de Perfil
+                </h3>
+                <div class="flex items-center space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-32 h-32 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden">
+                            {% if object and object.foto %}
+                                <img id="preview-image" 
+                                     src="{{ object.foto.url }}" 
+                                     alt="Foto del paciente" 
+                                     class="w-full h-full object-cover rounded-lg">
+                            {% else %}
+                                <div id="preview-placeholder" class="text-center text-gray-500">
+                                    <i class="fas fa-user text-3xl mb-2"></i>
+                                    <p class="text-sm">Sin foto</p>
+                                </div>
+                                <img id="preview-image" 
+                                     src="#" 
+                                     alt="Vista previa" 
+                                     class="w-full h-full object-cover rounded-lg hidden">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ form.foto.label }}</label>
+                        <div class="relative">
+                            <input type="file" 
+                                   name="foto" 
+                                   id="{{ form.foto.id_for_label }}"
+                                   accept="image/*"
+                                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-medium">Haz clic para subir</span> o arrastra y suelta
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG hasta 10MB</p>
+                            </div>
+                        </div>
+                        {% if form.foto.errors %}
+                            <div class="text-red-500 text-sm mt-1">{{ form.foto.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                    <i class="fas fa-info-circle mr-2"></i>Resumen
+                </h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Edad:</label>
+                            <div id="edad-display" class="text-lg font-semibold text-blue-600">
+                                {% if object and object.edad %}
+                                    {{ object.edad }} años
+                                {% else %}
+                                    <span class="text-gray-400">Se calculará automáticamente</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto:</label>
+                            <div id="foto-status" class="text-sm">
+                                {% if object and object.foto %}
+                                    <span class="text-green-600"><i class="fas fa-check mr-1"></i>Foto subida</span>
+                                {% else %}
+                                    <span class="text-gray-400">Sin foto</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <a href="{% url 'core:paciente_list' %}" 
+                   class="bg-white hover:bg-gray-50 text-black border-2 border-gray-400 hover:border-gray-600 px-6 py-2 rounded-lg font-medium transition-all duration-200">
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                    <i class="fas fa-save mr-2"></i>{{ action }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInput = document.querySelector('input[name="fecha_nacimiento"]');
+    const fotoInput = document.querySelector('input[name="foto"]');
+    const previewImage = document.getElementById('preview-image');
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+    const edadDisplay = document.getElementById('edad-display');
+    const fotoStatus = document.getElementById('foto-status');
+
+    // Función para calcular edad
+    function calcularEdad(fechaNacimiento) {
+        if (!fechaNacimiento) return null;
+        
+        const hoy = new Date();
+        const nacimiento = new Date(fechaNacimiento);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+        
+        if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+        }
+        
+        return edad;
+    }
+
+    // Actualizar edad cuando cambie la fecha
+    if (fechaInput) {
+        fechaInput.addEventListener('change', function() {
+            const edad = calcularEdad(this.value);
+            if (edad !== null && edad >= 0) {
+                edadDisplay.innerHTML = `<span class="text-blue-600">${edad} años</span>`;
+            } else {
+                edadDisplay.innerHTML = '<span class="text-gray-400">Fecha inválida</span>';
+            }
+        });
+    }
+
+    // Vista previa de imagen
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar tipo de archivo
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Por favor selecciona una imagen válida (JPG, JPEG, PNG)');
+                    this.value = '';
+                    return;
+                }
+
+                // Validar tamaño (10MB máximo)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('La imagen es demasiado grande. Máximo 10MB.');
+                    this.value = '';
+                    return;
+                }
+
+                // Mostrar vista previa
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.classList.remove('hidden');
+                    if (previewPlaceholder) {
+                        previewPlaceholder.classList.add('hidden');
+                    }
+                };
+                reader.readAsDataURL(file);
+
+                // Actualizar estado
+                fotoStatus.innerHTML = '<span class="text-green-600"><i class="fas fa-check mr-1"></i>Foto seleccionada</span>';
+            } else {
+                // Limpiar vista previa
+                previewImage.src = '#';
+                previewImage.classList.add('hidden');
+                if (previewPlaceholder) {
+                    previewPlaceholder.classList.remove('hidden');
+                }
+                fotoStatus.innerHTML = '<span class="text-gray-400">Sin foto</span>';
+            }
+        });
+
+        // Drag and drop
+        const dropZone = fotoInput.parentElement;
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fotoInput.files = files;
+                fotoInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

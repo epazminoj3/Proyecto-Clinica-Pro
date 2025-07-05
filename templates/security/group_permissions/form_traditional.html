@@ -1,0 +1,54 @@
+{% extends 'home.html' %} 
+<title>{% block title %}{{title}}{% endblock %}</title>
+{% load static %}
+
+{% block content %}
+<section class="dark:bg-principal">
+    <div class="text-center" data-aos="fade" data-aos-delay="200">
+        <div class="sm:pt-28 lg:pt-4">
+             <h1 class="rounded-2xl bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+                {{ title }}
+             </h1>
+        </div>
+
+        <div class="mx-4 lg:mx-20" data-aos="fade-up">
+            <div class="max-w-3xl mx-auto bg-white dark:bg-secundario rounded-3xl p-8">
+                <!-- Formulario tradicional individual -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-6">
+                        {% for field in form %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                            <div class="text-red-600 text-sm mt-1">
+                                {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex justify-center space-x-4 mt-8">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg transition-colors font-semibold">
+                            <i class="fa-solid fa-save mr-2"></i>{{ grabar|default:"Guardar" }}
+                        </button>
+                        <a href="{{ back_url }}" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded-lg transition-colors font-semibold">
+                            <i class="fa-solid fa-arrow-left mr-2"></i>Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

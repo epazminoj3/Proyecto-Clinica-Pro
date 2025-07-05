@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Cita Médica</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .header h1 {
+            color: #3b82f6;
+            margin: 0;
+        }
+        .cita-details {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #64748b;
+        }
+        .value {
+            color: #1e293b;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .important-note {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Confirmación de Cita Médica</h1>
+            <p>Su cita ha sido programada exitosamente</p>
+        </div>
+        
+        <p>Estimado/a <strong>{{ paciente.nombres }} {{ paciente.apellidos }}</strong>,</p>
+        
+        <p>Le confirmamos que su cita médica ha sido registrada en nuestro sistema con los siguientes detalles:</p>
+        
+        <div class="cita-details">
+            <div class="detail-row">
+                <span class="label">Paciente:</span>
+                <span class="value">{{ paciente.nombres }} {{ paciente.apellidos }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Fecha:</span>
+                <span class="value">{{ cita.fecha|date:"l, d \d\e F \d\e Y" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Hora:</span>
+                <span class="value">{{ cita.hora_cita|time:"H:i" }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Estado:</span>
+                <span class="value">{{ cita.get_estado_display }}</span>
+            </div>
+            {% if cita.observaciones %}
+            <div class="detail-row">
+                <span class="label">Observaciones:</span>
+                <span class="value">{{ cita.observaciones }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="important-note">
+            <strong>Importante:</strong>
+            <ul>
+                <li>Por favor, llegue 15 minutos antes de su cita programada</li>
+                <li>Traiga consigo un documento de identidad válido</li>
+                <li>Si necesita cancelar o reprogramar, contacte con anticipación</li>
+            </ul>
+        </div>
+        
+        <p>Si tiene alguna pregunta o necesita hacer cambios en su cita, no dude en contactarnos.</p>
+        
+        <div class="footer">
+            <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+            <p><strong>Sistema de Gestión Clínica</strong></p>
+            <p>Fecha de envío: {{ "now"|date:"d/m/Y H:i" }}</p>
+        </div>
+    </div>
+</body>
+</html>

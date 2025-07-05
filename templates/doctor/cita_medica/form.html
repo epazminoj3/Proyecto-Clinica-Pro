@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Editar Cita{% else %}Crear Cita{% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+/* Estilos adicionales para el formulario de cita médica */
+.paciente-section {
+    transition: all 0.3s ease;
+}
+
+.form-input {
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.radio-container input[type="radio"]:checked + span {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.section-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.section-card.active {
+    border-left-color: #3b82f6;
+    transform: translateX(2px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.error-border {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+</style>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {% if object %}Editar Cita Médica{% else %}Crear Nueva Cita{% endif %}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-300">
+                {% if object %}Modifica los datos de la cita{% else %}Completa la información de la nueva cita{% endif %}
+            </p>
+        </div>
+
+        <form method="post" class="space-y-6" id="citaForm">
+            {% csrf_token %}
+            
+            <!-- Campo oculto para indicar el modo de paciente -->
+            <input type="hidden" name="paciente_mode" id="paciente_mode_hidden" value="existing">
+            
+            <!-- Mostrar errores generales del formulario -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error en el formulario</h3>
+                            {% for error in form.non_field_errors %}
+                                <p class="mt-2 text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Sección de Paciente -->
+            <div class="section-card bg-blue-50 dark:bg-blue-900 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                    <i class="fas fa-user text-blue-600 mr-2"></i>
+                    Información del Paciente
+                </h3>
+                
+                <!-- Selector de modo -->
+                <div class="mb-4">
+                    <div class="flex space-x-4">
+                        <label class="radio-container flex items-center cursor-pointer">
+                            <input type="radio" name="paciente_mode" value="existing" id="modo_existente" checked 
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="px-3 py-1 rounded-lg transition-all duration-200">Seleccionar paciente existente</span>
+                        </label>
+                        <label class="radio-container flex items-center cursor-pointer">
+                            <input type="radio" name="paciente_mode" value="new" id="modo_nuevo" 
+                                   class="mr-2 text-blue-600 focus:ring-blue-500">
+                            <span class="px-3 py-1 rounded-lg transition-all duration-200">Crear nuevo paciente</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Selección de paciente existente -->
+                <div id="paciente_existente" class="paciente-section">
+                    <label for="{{ form.paciente.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ form.paciente.label }} *
+                    </label>
+                    <select name="paciente" id="{{ form.paciente.id_for_label }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Seleccionar paciente...</option>
+                        {% for paciente in form.paciente.field.queryset %}
+                            <option value="{{ paciente.pk }}" {% if form.paciente.value == paciente.pk %}selected{% endif %}>
+                                {{ paciente.nombre_completo }} - {{ paciente.cedula_ecuatoriana }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.paciente.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.paciente.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Selecciona un paciente de la lista</p>
+                </div>
+
+                <!-- Formulario para nuevo paciente -->
+                <div id="paciente_nuevo" class="paciente-section hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Nombres -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Nombres *
+                            </label>
+                            <input type="text" 
+                                   id="nuevo_nombres" 
+                                   name="nuevo_nombres"
+                                   class="form-input w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Ej: María José">
+                        </div>
+
+                        <!-- Apellidos -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Apellidos *
+                            </label>
+                            <input type="text" 
+                                   id="nuevo_apellidos" 
+                                   name="nuevo_apellidos"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Ej: García López">
+                        </div>
+
+                        <!-- Cédula -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Cédula *
+                            </label>
+                            <input type="text" 
+                                   id="nuevo_cedula" 
+                                   name="nuevo_cedula"
+                                   maxlength="10"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="1234567890">
+                            <p class="mt-1 text-xs text-gray-500">Número de cédula ecuatoriana (10 dígitos)</p>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Teléfono *
+                            </label>
+                            <input type="text" 
+                                   id="nuevo_telefono" 
+                                   name="nuevo_telefono"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Ej: 0998765432">
+                        </div>
+
+                        <!-- Fecha de Nacimiento -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Fecha de Nacimiento *
+                            </label>
+                            <input type="date" 
+                                   id="nuevo_fecha_nacimiento" 
+                                   name="nuevo_fecha_nacimiento"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Email
+                            </label>
+                            <input type="email" 
+                                   id="nuevo_email" 
+                                   name="nuevo_email"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="ejemplo@correo.com">
+                            <p class="mt-1 text-xs text-gray-500">Opcional</p>
+                        </div>
+
+                        <!-- Sexo -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Sexo *
+                            </label>
+                            <select id="nuevo_sexo" 
+                                    name="nuevo_sexo"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                            </select>
+                        </div>
+
+                        <!-- Dirección -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Dirección *
+                            </label>
+                            <input type="text" 
+                                   id="nuevo_direccion" 
+                                   name="nuevo_direccion"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Ej: Av. Principal 123, Quito">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded">
+                        <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            El paciente será creado automáticamente al guardar la cita.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Cita -->
+            <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt text-green-600 mr-2"></i>
+                    Información de la Cita
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Fecha -->
+                    <div>
+                        <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.fecha.label }} *
+                        </label>
+                        {% if object %}
+                            <input type="date" 
+                                   name="fecha" 
+                                   id="{{ form.fecha.id_for_label }}"
+                                   value="{{ object.fecha|date:'Y-m-d' }}"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        {% else %}
+                            {{ form.fecha }}
+                        {% endif %}
+                        {% if form.fecha.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.fecha.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Hora -->
+                    <div>
+                        <label for="{{ form.hora_cita.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.hora_cita.label }} *
+                        </label>
+                        {% if object %}
+                            <input type="time" 
+                                   name="hora_cita" 
+                                   id="{{ form.hora_cita.id_for_label }}"
+                                   value="{{ object.hora_cita|time:'H:i' }}"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        {% else %}
+                            {{ form.hora_cita }}
+                        {% endif %}
+                        {% if form.hora_cita.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.hora_cita.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label for="{{ form.estado.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.estado.label }} *
+                        </label>
+                        {{ form.estado }}
+                        {% if form.estado.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.estado.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div>
+                        <label for="{{ form.observaciones.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ form.observaciones.label }}
+                        </label>
+                        {{ form.observaciones }}
+                        {% if form.observaciones.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.observaciones.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
+                <a href="{% url 'doctor:cita_medica_list' %}" 
+                   class="btn-secondary bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" 
+                        class="btn-primary text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if object %}Actualizar Cita{% else %}Crear Cita{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos
+    const modoExistente = document.getElementById('modo_existente');
+    const modoNuevo = document.getElementById('modo_nuevo');
+    const seccionExistente = document.getElementById('paciente_existente');
+    const seccionNuevo = document.getElementById('paciente_nuevo');
+    const selectPaciente = document.getElementById('{{ form.paciente.id_for_label }}');
+    const pacienteModeHidden = document.getElementById('paciente_mode_hidden');
+    
+    // Referencias a campos de fecha y hora
+    const fechaInput = document.querySelector('input[name="fecha"]') || document.getElementById('{{ form.fecha.id_for_label }}');
+    const horaInput = document.querySelector('input[name="hora_cita"]') || document.getElementById('{{ form.hora_cita.id_for_label }}');
+    const form = document.getElementById('citaForm');
+    
+    // Función para alternar entre modos
+    function togglePacienteMode() {
+        if (modoExistente.checked) {
+            seccionExistente.classList.remove('hidden');
+            seccionNuevo.classList.add('hidden');
+            pacienteModeHidden.value = 'existing';
+            
+            // Habilitar select de paciente existente
+            if (selectPaciente) {
+                selectPaciente.disabled = false;
+                selectPaciente.required = true;
+                selectPaciente.removeAttribute('name'); // Temporalmente remover name para evitar conflictos
+                selectPaciente.setAttribute('name', 'paciente'); // Restaurar name
+            }
+            
+            // Deshabilitar campos de nuevo paciente
+            disableNewPatientFields();
+            
+        } else if (modoNuevo.checked) {
+            seccionExistente.classList.add('hidden');
+            seccionNuevo.classList.remove('hidden');
+            pacienteModeHidden.value = 'new';
+            
+            // Deshabilitar select de paciente existente completamente
+            if (selectPaciente) {
+                selectPaciente.disabled = true;
+                selectPaciente.required = false;
+                selectPaciente.value = '';
+                // Remover el atributo name para que no se envíe en el formulario
+                selectPaciente.removeAttribute('name');
+            }
+            
+            // Habilitar campos de nuevo paciente
+            enableNewPatientFields();
+        }
+    }
+    
+    // Función para deshabilitar campos de nuevo paciente
+    function disableNewPatientFields() {
+        const newFields = ['nuevo_nombres', 'nuevo_apellidos', 'nuevo_cedula', 'nuevo_telefono', 
+                          'nuevo_fecha_nacimiento', 'nuevo_sexo', 'nuevo_direccion', 'nuevo_email'];
+        newFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.disabled = true;
+                field.required = false;
+                field.value = ''; // Limpiar el valor
+                // Remover el atributo name para que no se envíe
+                field.removeAttribute('name');
+            }
+        });
+    }
+    
+    // Función para habilitar campos de nuevo paciente
+    function enableNewPatientFields() {
+        const requiredFields = [
+            { id: 'nuevo_nombres', name: 'nuevo_nombres', required: true },
+            { id: 'nuevo_apellidos', name: 'nuevo_apellidos', required: true },
+            { id: 'nuevo_cedula', name: 'nuevo_cedula', required: true },
+            { id: 'nuevo_telefono', name: 'nuevo_telefono', required: true },
+            { id: 'nuevo_fecha_nacimiento', name: 'nuevo_fecha_nacimiento', required: true },
+            { id: 'nuevo_sexo', name: 'nuevo_sexo', required: true },
+            { id: 'nuevo_direccion', name: 'nuevo_direccion', required: true },
+            { id: 'nuevo_email', name: 'nuevo_email', required: false }
+        ];
+        
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element) {
+                element.disabled = false;
+                element.required = field.required;
+                // Restaurar el atributo name
+                element.setAttribute('name', field.name);
+            }
+        });
+    }
+    
+    // Event listeners para cambio de modo
+    modoExistente.addEventListener('change', togglePacienteMode);
+    modoNuevo.addEventListener('change', togglePacienteMode);
+    
+    // Inicializar estado
+    togglePacienteMode();
+    
+    // Validación de cédula en tiempo real
+    const cedulaInput = document.getElementById('nuevo_cedula');
+    if (cedulaInput) {
+        cedulaInput.addEventListener('input', function() {
+            // Solo permitir números y limitar a 10 dígitos
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            
+            // Validar cédula ecuatoriana si tiene 10 dígitos
+            if (this.value.length === 10) {
+                if (!validarCedulaEcuatoriana(this.value)) {
+                    this.setCustomValidity('Número de cédula inválido');
+                    this.classList.add('border-red-500');
+                } else {
+                    this.setCustomValidity('');
+                    this.classList.remove('border-red-500');
+                }
+            } else {
+                this.setCustomValidity('La cédula debe tener 10 dígitos');
+                this.classList.add('border-red-500');
+            }
+        });
+    }
+    
+    // Función para validar cédula ecuatoriana
+    function validarCedulaEcuatoriana(cedula) {
+        if (cedula.length !== 10) return false;
+        
+        const provincia = parseInt(cedula.substring(0, 2));
+        if (provincia < 1 || provincia > 24) return false;
+        
+        const tercerDigito = parseInt(cedula.charAt(2));
+        if (tercerDigito > 6) return false;
+        
+        // Algoritmo de validación
+        const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+        let suma = 0;
+        
+        for (let i = 0; i < 9; i++) {
+            let valor = parseInt(cedula.charAt(i)) * coeficientes[i];
+            if (valor > 9) valor -= 9;
+            suma += valor;
+        }
+        
+        const digitoVerificador = parseInt(cedula.charAt(9));
+        const residuo = suma % 10;
+        const resultado = residuo === 0 ? 0 : 10 - residuo;
+        
+        return resultado === digitoVerificador;
+    }
+    
+    // Validación de disponibilidad de horario
+    function validateDateTime() {
+        if (fechaInput.value && horaInput.value) {
+            // Realizar una consulta AJAX para verificar disponibilidad
+            fetch(`/doctor/cita_medica/verificar-disponibilidad/?fecha=${fechaInput.value}&hora=${horaInput.value}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remover alertas previas
+                const alertaPrevia = document.querySelector('.alerta-conflicto');
+                if (alertaPrevia) {
+                    alertaPrevia.remove();
+                }
+                
+                if (!data.disponible) {
+                    // Mostrar alerta de conflicto
+                    const alerta = document.createElement('div');
+                    alerta.className = 'alerta-conflicto bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-md p-4 mt-4';
+                    alerta.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Advertencia</h3>
+                                <p class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">${data.mensaje}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insertar la alerta después de la sección de cita
+                    const citaSection = document.querySelector('.bg-green-50');
+                    citaSection.parentNode.insertBefore(alerta, citaSection.nextSibling);
+                }
+            })
+            .catch(error => {
+                console.log('Error al verificar disponibilidad:', error);
+            });
+        }
+    }
+    
+    // Agregar eventos de cambio para validación de fecha/hora
+    if (fechaInput) {
+        fechaInput.addEventListener('change', validateDateTime);
+    }
+    if (horaInput) {
+        horaInput.addEventListener('change', validateDateTime);
+    }
+    
+    // Validación antes del envío del formulario
+    form.addEventListener('submit', function(e) {
+        if (modoNuevo.checked) {
+            // Validar campos requeridos para nuevo paciente
+            const requiredFields = [
+                { id: 'nuevo_nombres', name: 'Nombres' },
+                { id: 'nuevo_apellidos', name: 'Apellidos' },
+                { id: 'nuevo_cedula', name: 'Cédula' },
+                { id: 'nuevo_telefono', name: 'Teléfono' },
+                { id: 'nuevo_fecha_nacimiento', name: 'Fecha de Nacimiento' },
+                { id: 'nuevo_sexo', name: 'Sexo' },
+                { id: 'nuevo_direccion', name: 'Dirección' }
+            ];
+            
+            let hasErrors = false;
+            let errorMessage = 'Por favor complete los siguientes campos:\n';
+            
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    hasErrors = true;
+                    errorMessage += `- ${field.name}\n`;
+                    element.classList.add('border-red-500');
+                } else {
+                    element.classList.remove('border-red-500');
+                }
+            });
+            
+            // Validar cédula específicamente
+            const cedulaField = document.getElementById('nuevo_cedula');
+            if (cedulaField.value && !validarCedulaEcuatoriana(cedulaField.value)) {
+                hasErrors = true;
+                errorMessage += '- Número de cédula inválido\n';
+                cedulaField.classList.add('border-red-500');
+            }
+            
+            if (hasErrors) {
+                e.preventDefault();
+                alert(errorMessage);
+                return false;
+            }
+        } else if (modoExistente.checked) {
+            // Validar que se haya seleccionado un paciente existente
+            if (selectPaciente && !selectPaciente.value) {
+                e.preventDefault();
+                alert('Por favor seleccione un paciente de la lista.');
+                selectPaciente.focus();
+                return false;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

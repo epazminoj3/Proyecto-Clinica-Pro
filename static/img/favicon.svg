@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Fondo circular médico -->
+  <circle cx="16" cy="16" r="15" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  
+  <!-- Cruz médica -->
+  <path d="M16 6v20M6 16h20" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Detalles adicionales -->
+  <circle cx="16" cy="16" r="8" fill="none" stroke="white" stroke-width="1" opacity="0.3"/>
+</svg>

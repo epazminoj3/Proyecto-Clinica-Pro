@@ -1,0 +1,1368 @@
+{% extends 'home.html' %} 
+<title>{% block title %}{{title}}{% endblock %}</title>
+{% load static %}
+{% block content %}
+<section class="dark:bg-principal">
+    <div class="text-center" data-aos="fade" data-aos-delay="200">
+        <div class="sm:pt-28 lg:pt-4">
+             <h1 class="rounded-2xl  bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+                {{ title1 }}
+             </h1>
+        </div>
+
+        <!-- Mensajes de error del formulario (no específicos de campo) -->
+        {% if form.non_field_errors %}
+        <div class="mx-4 lg:mx-20 mb-6" data-aos="fade-up">
+            <div class="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-lg max-w-4xl mx-auto">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-triangle text-red-500 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-red-800 dark:text-red-200 font-medium">
+                            Se encontraron errores en el formulario:
+                        </h3>
+                        <div class="mt-2 text-red-700 dark:text-red-300">
+                            <ul class="list-disc list-inside space-y-1">
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6 py-4">
+            <div class="mx-4 lg:mx-20" data-aos="fade">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Formulario -->
+                    <div class="lg:col-span-8 form-container">
+                        <!-- Contenedor principal del formulario -->
+                        <div class="bg-white dark:bg-secundario rounded-3xl p-8"
+                            data-aos="fade-up" data-aos-delay="200">
+                            {% csrf_token %}
+                            
+                            <!-- Secciones del formulario -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-info-circle text-blue-500"></i> Información Básica</h3>
+                    
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Campo Name -->
+                                    <div class="form-group">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                                            {{ form.name.label }}
+                                            {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.name.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo URL -->
+                                    <div class="form-group">
+                                        <label for="{{ form.url.id_for_label }}" class="form-label">
+                                            {{ form.url.label }}
+                                            {% if form.url.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.url }}
+                                        {% if form.url.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.url.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-cog text-blue-500"></i> Configuración</h3>
+                    
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Campo Menu -->
+                                    <div class="form-group">
+                                        <label for="{{ form.menu.id_for_label }}" class="form-label">
+                                            {{ form.menu.label }}
+                                            {% if form.menu.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.menu }}
+                                        {% if form.menu.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.menu.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo Order -->
+                                    <div class="form-group">
+                                        <label for="{{ form.order.id_for_label }}" class="form-label">
+                                            {{ form.order.label }}
+                                            {% if form.order.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.order }}
+                                        {% if form.order.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.order.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-palette text-blue-500"></i> Apariencia</h3>
+                    
+                                <div class="grid grid-cols-1 gap-6">
+                                    <!-- Campo Icon con selector visual -->
+                                    <div class="form-group">
+                                        <label for="{{ form.icon.id_for_label }}" class="form-label">
+                                            {{ form.icon.label }}
+                                            {% if form.icon.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        <div class="relative">
+                                            {{ form.icon }}
+                                            <button type="button" id="openIconSelector" 
+                                                class="absolute inset-y-0 right-0 px-3 flex items-center bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800/60 text-blue-700 dark:text-blue-300 rounded-r-md border-l border-blue-300 dark:border-blue-700 transition-colors">
+                                                <i class="fa-solid fa-icons"></i>
+                                            </button>
+                                            {% if form.icon.errors %}
+                                            <div class="absolute inset-y-0 right-10 pr-3 flex items-center pointer-events-none">
+                                                <i class="fa-solid fa-exclamation-circle text-red-500"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="validation-message info">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            Haz clic en el botón para seleccionar un ícono
+                                        </div>
+                                        {% if form.icon.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.icon.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <!-- Modal para selección de íconos -->
+                                        <div id="iconSelectorModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+                                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col" style="height: min(90vh, 650px);">
+                                                <!-- Cabecera fija -->
+                                                <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                                    <div class="flex justify-between items-center mb-4">
+                                                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Seleccionar Ícono</h3>
+                                                        <button id="closeIconSelector" type="button" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <i class="fa-solid fa-xmark text-xl"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Buscador -->
+                                                    <div class="mb-4">
+                                                        <div class="relative">
+                                                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                                <i class="fa-solid fa-search text-gray-400"></i>
+                                                            </div>
+                                                            <input type="text" id="iconSearch" placeholder="Buscar íconos..." 
+                                                                class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Categorías -->
+                                                    <div class="scrollbar-thin overflow-x-auto pb-2">
+                                                        <div class="flex gap-2 min-w-max">
+                                                            <button type="button" data-category="all" class="icon-category-btn active px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-sm font-medium whitespace-nowrap">
+                                                                Todos
+                                                            </button>
+                                                            <button type="button" data-category="fa-solid" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                                Solid
+                                                            </button>
+                                                            <button type="button" data-category="fa-regular" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                                Regular
+                                                            </button>
+                                                            <button type="button" data-category="fa-brands" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                                Marcas
+                                                            </button>
+                                                            <button type="button" data-category="bi" class="icon-category-btn px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium whitespace-nowrap">
+                                                                Bootstrap
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Contenedor con scroll para los íconos -->
+                                                <div class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-800/80 relative flex flex-col">
+                                                    <!-- Barra de resultados -->
+                                                    <div id="resultsBar" class="p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 text-sm text-gray-600 dark:text-gray-400 flex justify-between z-10">
+                                                        <span id="resultCount">Mostrando todos los iconos</span>
+                                                        <span class="text-blue-500 dark:text-blue-300">
+                                                            <i class="fa-solid fa-circle-info mr-1"></i>
+                                                            Haz scroll para ver más
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Grid de iconos -->
+                                                    <div class="p-5">
+                                                        <div id="iconsGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                                                            <!-- Los íconos se cargarán aquí -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Footer con indicaciones -->
+                                                <div class="p-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 text-center flex-shrink-0">
+                                                    <span class="bg-blue-500 text-white px-2 py-1 rounded-full mr-2"><i class="fa-solid fa-mouse-pointer"></i></span>
+                                                    Haz clic en un icono para seleccionarlo
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-align-left text-blue-500"></i> Descripción</h3>
+                    
+                                <div class="form-group">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                                        {{ form.description.label }}
+                                        {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                    </label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                    <div class="validation-message error">
+                                        {% for error in form.description.errors %}
+                                        <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-shield-alt text-blue-500"></i> Permisos</h3>
+                    
+                                <div class="form-group">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <label class="font-bold text-gray-800 dark:text-gray-200 text-base flex items-center">
+                                            <i class="fa-solid fa-shield-check mr-2 text-blue-600 dark:text-blue-400"></i>
+                                            {{ form.permissions.label }}
+                                            {% if form.permissions.field.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
+                                        </label>
+                                        
+                                        <!-- Botones de seleccionar todo/ninguno -->
+                                        <div class="flex gap-2">
+                                            <button type="button" onclick="selectAllPermissions()" 
+                                                class="text-xs bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 px-3 py-1 rounded-full transition-colors font-medium">
+                                                <i class="fa-solid fa-check-double mr-1"></i>Todos
+                                            </button>
+                                            <button type="button" onclick="deselectAllPermissions()" 
+                                                class="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 px-3 py-1 rounded-full transition-colors font-medium">
+                                                <i class="fa-solid fa-xmark mr-1"></i>Ninguno
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                                        <!-- Permisos inicialmente visibles (primeros 6) -->
+                                        <div class="permissions-grid-visible grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+                                            {% for choice in form.permissions|slice:":6" %}
+                                            <div class="permission-item">
+                                                {{ choice.tag }}
+                                                <label for="{{ choice.id_for_label }}" class="permission-label">
+                                                    {{ choice.choice_label }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <!-- Permisos adicionales (inicialmente ocultos) -->
+                                        {% if form.permissions|length > 6 %}
+                                        <div id="additional-permissions" class="hidden">
+                                            <div class="permissions-grid-hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+                                                {% for choice in form.permissions|slice:"6:" %}
+                                                <div class="permission-item">
+                                                    {{ choice.tag }}
+                                                    <label for="{{ choice.id_for_label }}" class="permission-label">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Botón mostrar/ocultar permisos adicionales -->
+                                        <button type="button" id="toggle-permissions-btn" onclick="toggleAdditionalPermissions()" 
+                                            class="w-full mt-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors flex items-center justify-center">
+                                            <i id="toggle-icon" class="fa-solid fa-chevron-down mr-2"></i>
+                                            <span id="toggle-text">Mostrar {{ form.permissions|length|add:"-6" }} permisos más</span>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Mostrar errores del campo -->
+                                    {% if form.permissions.errors %}
+                                    <div class="mt-2 text-red-600 dark:text-red-400 text-sm">
+                                        {% for error in form.permissions.errors %}
+                                        <div class="flex items-center mt-1">
+                                            <i class="fa-solid fa-exclamation-circle mr-2"></i>
+                                            {{ error }}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-toggle-on text-blue-500"></i> Estado</h3>
+                    
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        {{ form.is_active }}
+                                        <label for="{{ form.is_active.id_for_label }}" class="form-label">
+                                            {{ form.is_active.label }}
+                                            {% if form.is_active.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                    </div>
+                                    {% if form.is_active.errors %}
+                                    <div class="validation-message error">
+                                        {% for error in form.is_active.errors %}
+                                        <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save"></i>
+                                    {% if object %}Actualizar{% else %}Crear{% endif %} Módulo
+                                </button>
+                                <a href="{% url 'security:module_list' %}" class="btn btn-secondary">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista Previa -->
+                    <div class="lg:col-span-4 preview-container">
+                        <div class="preview-card" id="previewCard">
+                            <div class="preview-avatar" id="previewAvatar">
+                                <i class="fa-solid fa-cube" id="previewIcon"></i>
+                            </div>
+                            
+                            <div class="preview-name" id="previewName">Nuevo Módulo</div>
+                            <div class="preview-email" id="previewUrl">sin-url</div>
+                            
+                            <div class="preview-details">
+                                <div class="preview-detail-item" id="previewMenuContainer">
+                                    <i class="fa-solid fa-list preview-detail-icon"></i>
+                                    <span>Menú: <span id="previewMenu">Sin menú</span></span>
+                                </div>
+                                
+                                <div class="preview-detail-item" id="previewOrderContainer">
+                                    <i class="fa-solid fa-sort-numeric-up preview-detail-icon"></i>
+                                    <span>Orden: <span id="previewOrder">0</span></span>
+                                </div>
+                                
+                                <div class="preview-detail-item" id="previewDescriptionContainer" style="display: none;">
+                                    <i class="fa-solid fa-info-circle preview-detail-icon"></i>
+                                    <span id="previewDescription"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-groups" id="previewGroupsContainer">
+                                <div class="text-sm font-medium mb-2">Permisos:</div>
+                                <div id="previewPermissionsList">
+                                    <span class="preview-group-tag">Sin permisos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-status" id="previewStatus">
+                                <i class="fa-solid fa-circle mr-1"></i>
+                                Activo
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- CSS para estilos modernos -->
+<style>
+    .preview-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 24px;
+        padding: 2.5rem;
+        color: white;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        position: sticky;
+        top: 2rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .preview-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 4px solid rgba(255,255,255,0.3);
+        object-fit: cover;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+        color: rgba(255,255,255,0.9);
+        font-size: 2rem;
+    }
+
+    .preview-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        min-height: 2rem;
+    }
+
+    .preview-email {
+        text-align: center;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        min-height: 1.2rem;
+    }
+
+    .preview-details {
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .preview-detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .preview-detail-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .preview-detail-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 0.5rem;
+        opacity: 0.8;
+    }
+
+    .preview-groups {
+        margin-top: 1rem;
+    }
+
+    .preview-group-tag {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin: 0.25rem;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .preview-status {
+        text-align: center;
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .status-active {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #bbf7d0;
+    }
+
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #fecaca;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+    }
+
+    .form-section h3 {
+        margin: 0 0 1.5rem 0;
+        color: #1f2937;
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f3f4f6;
+    }
+
+    .form-section h3 i {
+        padding: 0.5rem;
+        border-radius: 8px;
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.95rem;
+    }
+
+    .form-label .text-red-500 {
+        color: #dc2626;
+        font-weight: 700;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: white;
+        font-family: inherit;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+    }
+
+    .checkbox-group:hover {
+        background: #f3f4f6;
+    }
+
+    .checkbox-input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+    }
+
+    .validation-message {
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .validation-message.error {
+        color: #ef4444;
+    }
+
+    .validation-message.success {
+        color: #10b981;
+    }
+
+    .validation-message.info {
+        color: #6b7280;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: normal;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+        border-color: #6b7280;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        border-color: #4b5563;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .groups-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    /* Estilos para el selector de iconos */
+    .icon-button {
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-button:hover {
+        transform: translateY(-2px);
+        border-color: #93c5fd;
+        background-color: #eff6ff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-button.selected {
+        background-color: #dbeafe;
+        border-color: #3b82f6;
+    }
+
+    #iconSelectorModal {
+        backdrop-filter: blur(8px);
+        position: fixed;
+        overscroll-behavior: contain;
+    }
+
+    #iconSearch {
+        transition: all 0.2s ease;
+    }
+
+    #iconSearch:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        border-color: #3b82f6;
+        outline: none;
+    }
+
+    /* Estilos para scrollbar personalizado */
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
+    }
+
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #4b5563;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+
+    /* Ajustar grid según tamaño de pantalla */
+    #iconsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: 450px) {
+        #iconsGrid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (min-width: 640px) {
+        #iconsGrid {
+            grid-template-columns: repeat(5, 1fr);
+        }
+    }
+
+    @media (min-width: 768px) {
+        #iconsGrid {
+            grid-template-columns: repeat(6, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        #iconsGrid {
+            grid-template-columns: repeat(8, 1fr);
+        }
+    }
+
+    /* Animación para modal */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #iconSelectorModal > div {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .preview-card {
+            position: static;
+            margin-bottom: 2rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn {
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .container {
+            max-width: 1400px;
+        }
+        
+        .form-container {
+            padding-right: 1rem;
+        }
+        
+        .preview-container {
+            padding-left: 1rem;
+        }
+    }
+    
+    /* ===== ESTILOS PARA PERMISOS ===== */
+    
+    /* Contenedor de cada permiso */
+    .permission-item {
+        display: flex;
+        align-items: flex-start;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 8px;
+        min-height: 50px;
+        transition: all 0.2s ease;
+        gap: 6px;
+    }
+
+    .permission-item:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Estilo para el label del permiso */
+    .permission-label {
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        flex: 1;
+        cursor: pointer;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        color: #374151;
+    }
+
+    /* Estilo para checkboxes */
+    .permission-item input[type="checkbox"] {
+        width: 16px !important;
+        height: 16px !important;
+        margin: 0 !important;
+        flex-shrink: 0;
+        accent-color: #3b82f6;
+        cursor: pointer;
+    }
+
+    /* Cuando está seleccionado */
+    .permission-item:has(input[type="checkbox"]:checked) {
+        background-color: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .permission-item:has(input[type="checkbox"]:checked) .permission-label {
+        color: #1e40af;
+        font-weight: 500;
+    }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+        .permission-item {
+            background: #374151;
+            border-color: #4b5563;
+        }
+        
+        .permission-item:hover {
+            border-color: #60a5fa;
+        }
+        
+        .permission-label {
+            color: #d1d5db !important;
+        }
+        
+        .permission-item:has(input[type="checkbox"]:checked) {
+            background-color: #1e3a8a;
+            border-color: #60a5fa;
+        }
+        
+        .permission-item:has(input[type="checkbox"]:checked) .permission-label {
+            color: #dbeafe !important;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .permissions-grid-visible,
+        .permissions-grid-hidden {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+        }
+        
+        .permission-item {
+            min-height: 45px;
+            padding: 6px;
+        }
+        
+        .permission-label {
+            font-size: 11px !important;
+        }
+    }
+
+    /* ...existing code... */
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // === ELEMENTOS DEL DOM ===
+    const nameInput = document.getElementById('id_name');
+    const urlInput = document.getElementById('id_url');
+    const menuSelect = document.getElementById('id_menu');
+    const orderInput = document.getElementById('id_order');
+    const descriptionTextarea = document.getElementById('id_description');
+    const iconInput = document.getElementById('id_icon');
+    const activeCheckbox = document.getElementById('id_is_active');
+    const permissionCheckboxes = document.querySelectorAll('input[name="permissions"]');
+    
+    // Elementos de vista previa
+    const previewName = document.getElementById('previewName');
+    const previewUrl = document.getElementById('previewUrl');
+    const previewMenu = document.getElementById('previewMenu');
+    const previewOrder = document.getElementById('previewOrder');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewDescriptionContainer = document.getElementById('previewDescriptionContainer');
+    const previewIcon = document.getElementById('previewIcon');
+    const previewPermissionsList = document.getElementById('previewPermissionsList');
+    const previewStatus = document.getElementById('previewStatus');
+    
+    // === FUNCIONES DE ACTUALIZACIÓN DE VISTA PREVIA ===
+    function updatePreviewName() {
+        if (!nameInput || !previewName) return;
+        const name = nameInput.value.trim();
+        previewName.textContent = name || 'Nuevo Módulo';
+        previewName.classList.toggle('animate-pulse', !name);
+    }
+    
+    function updatePreviewUrl() {
+        if (!urlInput || !previewUrl) return;
+        const url = urlInput.value.trim();
+        previewUrl.textContent = url || 'sin-url';
+        previewUrl.classList.toggle('animate-pulse', !url);
+    }
+    
+    function updatePreviewMenu() {
+        if (!menuSelect || !previewMenu) return;
+        const menuText = menuSelect.options[menuSelect.selectedIndex]?.text || 'Sin menú';
+        previewMenu.textContent = menuText;
+    }
+    
+    function updatePreviewOrder() {
+        if (!orderInput || !previewOrder) return;
+        const order = orderInput.value.trim();
+        previewOrder.textContent = order || '0';
+    }
+    
+    function updatePreviewDescription() {
+        if (!descriptionTextarea || !previewDescription || !previewDescriptionContainer) return;
+        const description = descriptionTextarea.value.trim();
+        if (description) {
+            previewDescription.textContent = description;
+            previewDescriptionContainer.style.display = 'block';
+        } else {
+            previewDescriptionContainer.style.display = 'none';
+        }
+    }
+    
+    function updatePreviewIcon() {
+        if (!iconInput || !previewIcon) return;
+        const iconClass = iconInput.value.trim();
+        if (iconClass) {
+            previewIcon.className = iconClass + ' text-3xl';
+        } else {
+            previewIcon.className = 'fa-solid fa-cube text-3xl';
+        }
+    }
+    
+    function updatePreviewPermissions() {
+        if (!previewPermissionsList) return;
+        const selectedPermissions = Array.from(permissionCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => {
+                const label = cb.nextElementSibling;
+                return label ? label.textContent.trim() : cb.value;
+            });
+        
+        if (selectedPermissions.length > 0) {
+            previewPermissionsList.innerHTML = selectedPermissions
+                .map(perm => `<span class="preview-group-tag">${perm}</span>`)
+                .join('');
+        } else {
+            previewPermissionsList.innerHTML = '<span class="preview-group-tag">Sin permisos</span>';
+        }
+    }
+    
+    function updatePreviewStatus() {
+        if (!activeCheckbox || !previewStatus) return;
+        const isActive = activeCheckbox.checked;
+        previewStatus.innerHTML = `<i class="fa-solid fa-circle mr-1"></i>${isActive ? 'Activo' : 'Inactivo'}`;
+        previewStatus.className = `preview-status ${isActive ? 'status-active' : 'status-inactive'}`;
+    }
+    
+    // === EVENT LISTENERS PARA VISTA PREVIA ===
+    if (nameInput) nameInput.addEventListener('input', updatePreviewName);
+    if (urlInput) urlInput.addEventListener('input', updatePreviewUrl);
+    if (menuSelect) menuSelect.addEventListener('change', updatePreviewMenu);
+    if (orderInput) orderInput.addEventListener('input', updatePreviewOrder);
+    if (descriptionTextarea) descriptionTextarea.addEventListener('input', updatePreviewDescription);
+    if (iconInput) iconInput.addEventListener('input', updatePreviewIcon);
+    if (activeCheckbox) activeCheckbox.addEventListener('change', updatePreviewStatus);
+    
+    permissionCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updatePreviewPermissions);
+    });
+    
+    // === INICIALIZAR VISTA PREVIA ===
+    function initializePreview() {
+        updatePreviewName();
+        updatePreviewUrl();
+        updatePreviewMenu();
+        updatePreviewOrder();
+        updatePreviewDescription();
+        updatePreviewIcon();
+        updatePreviewPermissions();
+        updatePreviewStatus();
+    }
+    
+    // === SELECTOR DE ICONOS ===
+    const openIconSelectorBtn = document.getElementById('openIconSelector');
+    const closeIconSelectorBtn = document.getElementById('closeIconSelector');
+    const iconSelectorModal = document.getElementById('iconSelectorModal');
+    const iconSearch = document.getElementById('iconSearch');
+    const iconsGrid = document.getElementById('iconsGrid');
+    const resultCount = document.getElementById('resultCount');
+    const categoryBtns = document.querySelectorAll('.icon-category-btn');
+    
+    // Base de datos de iconos
+    const iconDatabase = {
+        'fa-solid': [
+            'fa-solid fa-home', 'fa-solid fa-user', 'fa-solid fa-cog', 'fa-solid fa-bell', 'fa-solid fa-heart',
+            'fa-solid fa-star', 'fa-solid fa-search', 'fa-solid fa-plus', 'fa-solid fa-minus', 'fa-solid fa-times',
+            'fa-solid fa-check', 'fa-solid fa-arrow-right', 'fa-solid fa-arrow-left', 'fa-solid fa-arrow-up', 'fa-solid fa-arrow-down',
+            'fa-solid fa-edit', 'fa-solid fa-trash', 'fa-solid fa-save', 'fa-solid fa-print', 'fa-solid fa-download',
+            'fa-solid fa-upload', 'fa-solid fa-share', 'fa-solid fa-lock', 'fa-solid fa-unlock', 'fa-solid fa-eye',
+            'fa-solid fa-eye-slash', 'fa-solid fa-calendar', 'fa-solid fa-clock', 'fa-solid fa-envelope', 'fa-solid fa-phone',
+            'fa-solid fa-map', 'fa-solid fa-car', 'fa-solid fa-plane', 'fa-solid fa-ship', 'fa-solid fa-bicycle',
+            'fa-solid fa-shopping-cart', 'fa-solid fa-credit-card', 'fa-solid fa-money-bill', 'fa-solid fa-gift', 'fa-solid fa-trophy',
+            'fa-solid fa-medal', 'fa-solid fa-crown', 'fa-solid fa-key', 'fa-solid fa-shield', 'fa-solid fa-fire',
+            'fa-solid fa-bolt', 'fa-solid fa-snowflake', 'fa-solid fa-sun', 'fa-solid fa-moon', 'fa-solid fa-cloud',
+            'fa-solid fa-umbrella', 'fa-solid fa-tree', 'fa-solid fa-leaf', 'fa-solid fa-flower', 'fa-solid fa-apple',
+            'fa-solid fa-coffee', 'fa-solid fa-pizza-slice', 'fa-solid fa-hamburger', 'fa-solid fa-wine-glass', 'fa-solid fa-beer',
+            'fa-solid fa-music', 'fa-solid fa-video', 'fa-solid fa-camera', 'fa-solid fa-microphone', 'fa-solid fa-headphones',
+            'fa-solid fa-gamepad', 'fa-solid fa-tv', 'fa-solid fa-laptop', 'fa-solid fa-mobile', 'fa-solid fa-tablet',
+            'fa-solid fa-desktop', 'fa-solid fa-keyboard', 'fa-solid fa-mouse', 'fa-solid fa-wifi', 'fa-solid fa-bluetooth',
+            'fa-solid fa-battery-full', 'fa-solid fa-plug', 'fa-solid fa-lightbulb', 'fa-solid fa-tools', 'fa-solid fa-wrench',
+            'fa-solid fa-hammer', 'fa-solid fa-screwdriver', 'fa-solid fa-paint-brush', 'fa-solid fa-palette', 'fa-solid fa-image',
+            'fa-solid fa-file', 'fa-solid fa-folder', 'fa-solid fa-book', 'fa-solid fa-bookmark', 'fa-solid fa-newspaper',
+            'fa-solid fa-graduation-cap', 'fa-solid fa-school', 'fa-solid fa-university', 'fa-solid fa-hospital', 'fa-solid fa-ambulance',
+            'fa-solid fa-stethoscope', 'fa-solid fa-pills', 'fa-solid fa-syringe', 'fa-solid fa-heartbeat', 'fa-solid fa-wheelchair',
+            'fa-solid fa-dumbbell', 'fa-solid fa-running', 'fa-solid fa-swimming-pool', 'fa-solid fa-football-ball', 'fa-solid fa-basketball-ball',
+            'fa-solid fa-tennis-ball', 'fa-solid fa-golf-ball', 'fa-solid fa-chess', 'fa-solid fa-dice', 'fa-solid fa-puzzle-piece',
+            'fa-solid fa-rocket', 'fa-solid fa-satellite', 'fa-solid fa-globe', 'fa-solid fa-compass', 'fa-solid fa-anchor',
+            'fa-solid fa-flag', 'fa-solid fa-thumbs-up', 'fa-solid fa-thumbs-down', 'fa-solid fa-handshake', 'fa-solid fa-pray',
+            'fa-solid fa-peace', 'fa-solid fa-yin-yang', 'fa-solid fa-infinity', 'fa-solid fa-recycle', 'fa-solid fa-seedling'
+        ],
+        'fa-regular': [
+            'fa-regular fa-heart', 'fa-regular fa-star', 'fa-regular fa-user', 'fa-regular fa-envelope', 'fa-regular fa-calendar',
+            'fa-regular fa-clock', 'fa-regular fa-eye', 'fa-regular fa-thumbs-up', 'fa-regular fa-thumbs-down', 'fa-regular fa-smile',
+            'fa-regular fa-frown', 'fa-regular fa-meh', 'fa-regular fa-angry', 'fa-regular fa-surprised', 'fa-regular fa-dizzy-face',
+            'fa-regular fa-file', 'fa-regular fa-folder', 'fa-regular fa-bookmark', 'fa-regular fa-bell', 'fa-regular fa-comment',
+            'fa-regular fa-comments', 'fa-regular fa-handshake', 'fa-regular fa-lightbulb', 'fa-regular fa-gem', 'fa-regular fa-moon',
+            'fa-regular fa-sun', 'fa-regular fa-snowflake', 'fa-regular fa-building', 'fa-regular fa-hospital', 'fa-regular fa-flag',
+            'fa-regular fa-map', 'fa-regular fa-chart-bar', 'fa-regular fa-copy', 'fa-regular fa-edit', 'fa-regular fa-trash-alt',
+            'fa-regular fa-play-circle', 'fa-regular fa-pause-circle', 'fa-regular fa-stop-circle', 'fa-regular fa-window-maximize', 'fa-regular fa-window-minimize'
+        ],
+        'fa-brands': [
+            'fa-brands fa-facebook', 'fa-brands fa-twitter', 'fa-brands fa-instagram', 'fa-brands fa-linkedin', 'fa-brands fa-youtube',
+            'fa-brands fa-google', 'fa-brands fa-github', 'fa-brands fa-gitlab', 'fa-brands fa-bitbucket', 'fa-brands fa-stack-overflow',
+            'fa-brands fa-apple', 'fa-brands fa-microsoft', 'fa-brands fa-amazon', 'fa-brands fa-netflix', 'fa-brands fa-spotify',
+            'fa-brands fa-whatsapp', 'fa-brands fa-telegram', 'fa-brands fa-discord', 'fa-brands fa-slack', 'fa-brands fa-skype',
+            'fa-brands fa-paypal', 'fa-brands fa-stripe', 'fa-brands fa-bitcoin', 'fa-brands fa-ethereum', 'fa-brands fa-docker',
+            'fa-brands fa-ubuntu', 'fa-brands fa-windows', 'fa-brands fa-android', 'fa-brands fa-react', 'fa-brands fa-angular',
+            'fa-brands fa-vue', 'fa-brands fa-node-js', 'fa-brands fa-npm', 'fa-brands fa-python', 'fa-brands fa-java',
+            'fa-brands fa-php', 'fa-brands fa-laravel', 'fa-brands fa-wordpress', 'fa-brands fa-drupal', 'fa-brands fa-joomla'
+        ],
+        'bi': [
+            'bi bi-house', 'bi bi-person', 'bi bi-gear', 'bi bi-bell', 'bi bi-heart',
+            'bi bi-star', 'bi bi-search', 'bi bi-plus', 'bi bi-dash', 'bi bi-x',
+            'bi bi-check', 'bi bi-arrow-right', 'bi bi-arrow-left', 'bi bi-arrow-up', 'bi bi-arrow-down',
+            'bi bi-pencil', 'bi bi-trash', 'bi bi-save', 'bi bi-printer', 'bi bi-download',
+            'bi bi-upload', 'bi bi-share', 'bi bi-lock', 'bi bi-unlock', 'bi bi-eye',
+            'bi bi-eye-slash', 'bi bi-calendar', 'bi bi-clock', 'bi bi-envelope', 'bi bi-phone',
+            'bi bi-geo-alt', 'bi bi-car-front', 'bi bi-airplane', 'bi bi-truck', 'bi bi-bicycle',
+            'bi bi-cart', 'bi bi-credit-card', 'bi bi-cash', 'bi bi-gift', 'bi bi-trophy',
+            'bi bi-award', 'bi bi-crown', 'bi bi-key', 'bi bi-shield', 'bi bi-fire',
+            'bi bi-lightning', 'bi bi-snow', 'bi bi-sun', 'bi bi-moon', 'bi bi-cloud',
+            'bi bi-umbrella', 'bi bi-tree', 'bi bi-flower1', 'bi bi-apple', 'bi bi-cup',
+            'bi bi-music-note', 'bi bi-camera-video', 'bi bi-camera', 'bi bi-mic', 'bi bi-headphones',
+            'bi bi-controller', 'bi bi-tv', 'bi bi-laptop', 'bi bi-phone', 'bi bi-tablet',
+            'bi bi-pc-display', 'bi bi-keyboard', 'bi bi-mouse', 'bi bi-wifi', 'bi bi-bluetooth',
+            'bi bi-battery-full', 'bi bi-plug', 'bi bi-lightbulb', 'bi bi-tools', 'bi bi-wrench',
+            'bi bi-hammer', 'bi bi-screwdriver', 'bi bi-brush', 'bi bi-palette', 'bi bi-image',
+            'bi bi-file-earmark', 'bi bi-folder', 'bi bi-book', 'bi bi-bookmark', 'bi bi-newspaper',
+            'bi bi-mortarboard', 'bi bi-building', 'bi bi-hospital', 'bi bi-ambulance', 'bi bi-heart-pulse'
+        ]
+    };
+    
+    let currentCategory = 'all';
+    let currentSearch = '';
+    
+    function getAllIcons() {
+        return Object.values(iconDatabase).flat();
+    }
+    
+    function getFilteredIcons() {
+        let icons = currentCategory === 'all' ? getAllIcons() : iconDatabase[currentCategory] || [];
+        
+        if (currentSearch) {
+            icons = icons.filter(icon => 
+                icon.toLowerCase().includes(currentSearch.toLowerCase())
+            );
+        }
+        
+        return icons;
+    }
+    
+    function renderIcons() {
+        if (!iconsGrid || !iconInput) return;
+        
+        const icons = getFilteredIcons();
+        const currentIcon = iconInput.value.trim();
+        
+        iconsGrid.innerHTML = icons.map(icon => `
+            <button type="button" 
+                    class="icon-button p-4 rounded-lg border bg-white dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all ${currentIcon === icon ? 'selected' : ''}"
+                    data-icon="${icon}"
+                    title="${icon}">
+                <i class="${icon} text-xl mb-2"></i>
+                <span class="text-xs text-gray-600 dark:text-gray-400 truncate w-full">${icon.split(' ').pop().replace('fa-', '').replace('bi-', '')}</span>
+            </button>
+        `).join('');
+        
+        // Actualizar contador
+        if (resultCount) {
+            resultCount.textContent = `Mostrando ${icons.length} iconos`;
+        }
+        
+        // Agregar event listeners a los botones de iconos
+        iconsGrid.querySelectorAll('.icon-button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const selectedIcon = this.dataset.icon;
+                iconInput.value = selectedIcon;
+                updatePreviewIcon();
+                
+                // Actualizar selección visual
+                iconsGrid.querySelectorAll('.icon-button').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Cerrar modal después de un breve delay
+                setTimeout(() => {
+                    if (iconSelectorModal) {
+                        iconSelectorModal.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    }
+                }, 300);
+            });
+        });
+    }
+    
+    // Event listeners para el selector de iconos
+    if (openIconSelectorBtn) {
+        openIconSelectorBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (iconSelectorModal) {
+                iconSelectorModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                renderIcons();
+                if (iconSearch) iconSearch.focus();
+            }
+        });
+    }
+    
+    if (closeIconSelectorBtn) {
+        closeIconSelectorBtn.addEventListener('click', function() {
+            if (iconSelectorModal) {
+                iconSelectorModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    if (iconSelectorModal) {
+        iconSelectorModal.addEventListener('click', function(e) {
+            if (e.target === iconSelectorModal) {
+                iconSelectorModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+    
+    // Buscador de iconos
+    if (iconSearch) {
+        iconSearch.addEventListener('input', function() {
+            currentSearch = this.value.trim();
+            renderIcons();
+        });
+    }
+    
+    // Filtros por categoría
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            categoryBtns.forEach(b => {
+                b.classList.remove('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+                b.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            });
+            
+            this.classList.add('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+            this.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            
+            currentCategory = this.dataset.category;
+            currentSearch = '';
+            iconSearch.value = '';
+            renderIcons();
+        });
+    });
+    
+    // Tecla ESC para cerrar modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && iconSelectorModal && !iconSelectorModal.classList.contains('hidden')) {
+            iconSelectorModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // === FUNCIONES PARA SELECCIONAR/DESELECCIONAR PERMISOS ===
+    const selectAllPermissionsBtn = document.getElementById('selectAllPermissions');
+    const deselectAllPermissionsBtn = document.getElementById('deselectAllPermissions');
+    
+    function selectAllPermissions() {
+        permissionCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updatePreviewPermissions();
+    }
+    
+    function deselectAllPermissions() {
+        permissionCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updatePreviewPermissions();
+    }
+    
+    // Event listeners para los botones de permisos
+    if (selectAllPermissionsBtn) {
+        selectAllPermissionsBtn.addEventListener('click', selectAllPermissions);
+    }
+    
+    if (deselectAllPermissionsBtn) {
+        deselectAllPermissionsBtn.addEventListener('click', deselectAllPermissions);
+    }
+    
+    // Inicializar contadores de permisos
+    function initializePermissionCounters() {
+        const totalCheckboxes = document.querySelectorAll('input[name="permissions"]').length;
+        const visibleCheckboxes = document.querySelectorAll('.permissions-grid-visible input').length;
+        const hiddenCheckboxes = totalCheckboxes - visibleCheckboxes;
+        
+        const toggleText = document.getElementById('toggle-text');
+        if (toggleText && hiddenCheckboxes > 0) {
+            toggleText.textContent = `Mostrar ${hiddenCheckboxes} permisos más`;
+        }
+    }
+    
+    // Inicializar contadores
+    setTimeout(initializePermissionCounters, 100);
+    
+    // === INICIALIZACIÓN ===
+    initializePreview();
+});
+
+// ===== FUNCIONES GLOBALES PARA MANEJO DE PERMISOS =====
+
+// Seleccionar todos los permisos (función global)
+function selectAllPermissions() {
+    const checkboxes = document.querySelectorAll('input[name="permissions"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    // Actualizar vista previa
+    const event = new Event('change');
+    checkboxes.forEach(checkbox => checkbox.dispatchEvent(event));
+}
+
+// Deseleccionar todos los permisos (función global)
+function deselectAllPermissions() {
+    const checkboxes = document.querySelectorAll('input[name="permissions"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    // Actualizar vista previa
+    const event = new Event('change');
+    checkboxes.forEach(checkbox => checkbox.dispatchEvent(event));
+}
+
+// Mostrar/ocultar permisos adicionales (función global)
+function toggleAdditionalPermissions() {
+    const additionalDiv = document.getElementById('additional-permissions');
+    const toggleBtn = document.getElementById('toggle-permissions-btn');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleText = document.getElementById('toggle-text');
+    
+    if (!additionalDiv || !toggleBtn) return;
+    
+    const isHidden = additionalDiv.classList.contains('hidden');
+    
+    if (isHidden) {
+        // Mostrar permisos adicionales
+        additionalDiv.classList.remove('hidden');
+        toggleIcon.classList.remove('fa-chevron-down');
+        toggleIcon.classList.add('fa-chevron-up');
+        toggleText.textContent = 'Ocultar permisos adicionales';
+    } else {
+        // Ocultar permisos adicionales
+        additionalDiv.classList.add('hidden');
+        toggleIcon.classList.remove('fa-chevron-up');
+        toggleIcon.classList.add('fa-chevron-down');
+        const additionalCount = document.querySelectorAll('#additional-permissions input').length;
+        toggleText.textContent = `Mostrar ${additionalCount} permisos más`;
+    }
+}
+</script>
+
+{% endblock %}

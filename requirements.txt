@@ -1,0 +1,26 @@
+# Sistema Clínico con IA - Dependencias principales
+Django==5.2.1
+psycopg2==2.9.10
+pillow==11.2.1
+
+# IA y API
+groq>=0.4.0
+
+# Utilidades Django
+django-extensions==4.1
+django-tailwind==4.0.1
+django-browser-reload==1.18.0
+
+# Utilidades Python
+requests==2.31.0
+python-dateutil==2.9.0.post0
+python-slugify==8.0.4
+
+# Sistema base
+asgiref==3.8.1
+sqlparse==0.5.3
+tzdata==2025.2
+certifi==2025.4.26
+urllib3==2.4.0
+charset-normalizer==3.4.2
+idna==3.10

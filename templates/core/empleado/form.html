@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}{% if form.instance.pk %}Editar Empleado{% else %}Nuevo Empleado{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% if form.instance.pk %}Editar Empleado{% else %}Nuevo Empleado{% endif %}
+                    </h1>
+                    <p class="text-gray-600 mt-1">
+                        {% if form.instance.pk %}Modifique los datos del empleado{% else %}Complete la información del nuevo empleado{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'core:empleado_list' %}" 
+                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Volver
+                </a>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white shadow-lg rounded-lg">
+            <form method="post" enctype="multipart/form-data" class="space-y-6 p-6">
+                {% csrf_token %}
+                
+                <!-- Personal Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.nombres.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.nombres.label }}
+                                {% if form.nombres.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.nombres }}
+                            {% if form.nombres.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.nombres.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.apellidos.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.apellidos.label }}
+                                {% if form.apellidos.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.apellidos }}
+                            {% if form.apellidos.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.apellidos.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.cedula_ecuatoriana.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.cedula_ecuatoriana.label }}
+                                {% if form.cedula_ecuatoriana.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.cedula_ecuatoriana }}
+                            {% if form.cedula_ecuatoriana.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.cedula_ecuatoriana.help_text }}</p>
+                            {% endif %}
+                            {% if form.cedula_ecuatoriana.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.cedula_ecuatoriana.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.dni.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.dni.label }}
+                                {% if form.dni.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.dni }}
+                            {% if form.dni.help_text %}
+                                <p class="mt-1 text-sm text-gray-500">{{ form.dni.help_text }}</p>
+                            {% endif %}
+                            {% if form.dni.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.dni.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.fecha_nacimiento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.fecha_nacimiento.label }}
+                                {% if form.fecha_nacimiento.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {% if form.instance.pk %}
+                                <input type="date" 
+                                       name="fecha_nacimiento" 
+                                       id="{{ form.fecha_nacimiento.id_for_label }}"
+                                       value="{{ form.instance.fecha_nacimiento|date:'Y-m-d' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            {% else %}
+                                {{ form.fecha_nacimiento }}
+                            {% endif %}
+                            {% if form.fecha_nacimiento.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.fecha_nacimiento.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.cargo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.cargo.label }}
+                                {% if form.cargo.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.cargo }}
+                            {% if form.cargo.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.cargo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employment Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información Laboral</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.sueldo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.sueldo.label }}
+                                {% if form.sueldo.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.sueldo }}
+                            {% if form.sueldo.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.sueldo.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.fecha_ingreso.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.fecha_ingreso.label }}
+                                {% if form.fecha_ingreso.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {% if form.instance.pk %}
+                                <input type="date" 
+                                       name="fecha_ingreso" 
+                                       id="{{ form.fecha_ingreso.id_for_label }}"
+                                       value="{{ form.instance.fecha_ingreso|date:'Y-m-d' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            {% else %}
+                                {{ form.fecha_ingreso }}
+                            {% endif %}
+                            {% if form.fecha_ingreso.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.fecha_ingreso.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Contacto y Ubicación</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="{{ form.direccion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.direccion.label }}
+                                {% if form.direccion.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.direccion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.latitud.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.latitud.label }}
+                                {% if form.latitud.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.latitud }}
+                            {% if form.latitud.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.latitud.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.longitud.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.longitud.label }}
+                                {% if form.longitud.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.longitud }}
+                            {% if form.longitud.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.longitud.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.foto.label }}
+                                {% if form.foto.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden">
+                                        {% if form.instance.pk and form.instance.foto %}
+                                            <img id="foto-preview" 
+                                                 src="{{ form.instance.foto.url }}" 
+                                                 alt="Foto del empleado" 
+                                                 class="w-full h-full object-cover rounded-lg">
+                                        {% else %}
+                                            <div id="foto-placeholder" class="text-center text-gray-500">
+                                                <i class="fas fa-user text-2xl mb-1"></i>
+                                                <p class="text-xs">Sin foto</p>
+                                            </div>
+                                            <img id="foto-preview" 
+                                                 src="#" 
+                                                 alt="Vista previa" 
+                                                 class="w-full h-full object-cover rounded-lg hidden">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="relative">
+                                        <input type="file" 
+                                               name="foto" 
+                                               id="{{ form.foto.id_for_label }}"
+                                               accept="image/*"
+                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors bg-gray-50">
+                                            <i class="fas fa-camera text-green-400 text-xl mb-2"></i>
+                                            <p class="text-sm text-gray-600">
+                                                <span class="font-medium text-blue-600">Haz clic para subir</span>
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG hasta 5MB</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.foto.errors %}
+                                <div class="mt-1 text-sm text-red-600">{{ form.foto.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Section -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Estado</h3>
+                    <div class="flex items-center">
+                        <div class="flex items-center h-5">
+                            {{ form.activo }}
+                        </div>
+                        <div class="ml-3">
+                            <label for="{{ form.activo.id_for_label }}" class="text-sm font-medium text-gray-700">
+                                {{ form.activo.label }}
+                            </label>
+                            {% if form.activo.help_text %}
+                                <p class="text-sm text-gray-500">{{ form.activo.help_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if form.activo.errors %}
+                        <div class="mt-1 text-sm text-red-600">{{ form.activo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="pt-6 border-t border-gray-200">
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'core:empleado_list' %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg transition-colors duration-200">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para manejar archivos
+    function setupFileInput(inputId, previewId, placeholderId, filenameId, maxSize = 5) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        const placeholder = document.getElementById(placeholderId);
+        const filename = document.getElementById(filenameId);
+        
+        if (!input) return;
+        
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar tamaño
+                if (file.size > maxSize * 1024 * 1024) {
+                    alert(`El archivo es demasiado grande. Máximo ${maxSize}MB.`);
+                    this.value = '';
+                    return;
+                }
+                
+                // Mostrar nombre del archivo
+                if (filename) {
+                    filename.textContent = `✓ ${file.name}`;
+                    filename.classList.remove('hidden');
+                }
+                
+                // Vista previa para imágenes
+                if (file.type.startsWith('image/') && preview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                        if (placeholder) {
+                            placeholder.classList.add('hidden');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                // Limpiar vista previa
+                if (filename) {
+                    filename.classList.add('hidden');
+                }
+                if (preview && placeholder) {
+                    preview.src = '#';
+                    preview.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                }
+            }
+        });
+        
+        // Drag and drop
+        const dropZone = input.parentElement;
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-400', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                input.files = files;
+                input.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+    
+    // Configurar el input de foto
+    setupFileInput('{{ form.foto.id_for_label }}', 'foto-preview', 'foto-placeholder', null, 5);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1129 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}
+        Editar Pago
+    {% else %}
+        Nuevo Pago
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Breadcrumb -->
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'home' %}" class="text-gray-700 hover:text-blue-600 inline-flex items-center">
+                        <svg class="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-3a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                        {{ title }}
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="{% url 'doctor:pago_list' %}" class="ml-1 text-gray-700 hover:text-blue-600 md:ml-2">{{ title1 }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-gray-500 md:ml-2">
+                            {% if object %}Editar{% else %}Nuevo{% endif %}
+                        </span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% if object %}
+                            <svg class="w-8 h-8 text-blue-600 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            {{ title1 }}
+                        {% else %}
+                            <svg class="w-8 h-8 text-green-600 inline-block mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            {{ title1 }}
+                        {% endif %}
+                    </h1>
+                    <a href="{% url 'doctor:pago_list' %}" 
+                       class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Volver
+                    </a>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="px-6 py-6">
+                <form method="post" enctype="multipart/form-data" class="space-y-8">
+                    {% csrf_token %}
+                    
+                    <!-- Información General del Pago -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                            <svg class="w-6 h-6 text-blue-600 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Información General del Pago
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Atención -->
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="{{ form.atencion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Atención Médica *
+                                </label>
+                                {{ form.atencion }}
+                                {% if form.atencion.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.atencion.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-2 text-sm text-gray-500">Seleccione la atención médica asociada a este pago</p>
+                            </div>
+
+                            <!-- Método de Pago -->
+                            <div>
+                                <label for="{{ form.metodo_pago.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Método de Pago *
+                                </label>
+                                {{ form.metodo_pago }}
+                                {% if form.metodo_pago.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.metodo_pago.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- PayPal Button (hidden by default) -->
+                                <div id="paypal-container" class="mt-4" style="display:none;">
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-blue-900 mb-2">Pagar con PayPal</h4>
+                                        <div id="paypal-button-container"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Transferencia Bancaria Info (hidden by default) -->
+                                <div id="transferencia-info" class="mt-4 bg-blue-50 p-4 rounded-lg" style="display:none;">
+                                    <h4 class="font-semibold text-blue-900 mb-3">Datos para Transferencia Bancaria</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="flex items-center mb-2">
+                                                <div class="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center mr-2">
+                                                    <span class="text-white font-bold text-sm">G</span>
+                                                </div>
+                                                <span class="font-semibold">Banco Guayaquil</span>
+                                            </div>
+                                            <div class="text-sm text-gray-600">
+                                                <div>Cuenta: 0123456789</div>
+                                                <div>Tipo: Corriente</div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="flex items-center mb-2">
+                                                <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center mr-2">
+                                                    <span class="text-black font-bold text-sm">P</span>
+                                                </div>
+                                                <span class="font-semibold">Banco Pichincha</span>
+                                            </div>
+                                            <div class="text-sm text-gray-600">
+                                                <div>Cuenta: 9876543210</div>
+                                                <div>Tipo: Ahorros</div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white p-3 rounded border">
+                                            <div class="flex items-center mb-2">
+                                                <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mr-2">
+                                                    <span class="text-white font-bold text-sm">B</span>
+                                                </div>
+                                                <span class="font-semibold">Banco Bolivariano</span>
+                                            </div>
+                                            <div class="text-sm text-gray-600">
+                                                <div>Cuenta: 5555444433</div>
+                                                <div>Tipo: Corriente</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded border">
+                                        <div class="text-sm">
+                                            <div><strong>Titular:</strong> Clínica Médica S.A.</div>
+                                            <div><strong>RUC:</strong> 0123456789001</div>
+                                            <div><strong>Concepto:</strong> Pago de servicios médicos</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-xs text-gray-500">
+                                        <p>📄 Después de realizar la transferencia, asegúrese de subir el comprobante en el campo "Evidencia de Pago".</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tarjeta de Crédito/Débito Info -->
+                                <div id="tarjeta-info" class="mt-4 bg-green-50 p-4 rounded-lg" style="display:none;">
+                                    <h4 class="font-semibold text-green-900 mb-3">Pago con Tarjeta</h4>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="flex items-center justify-center space-x-4 mb-3">
+                                            <div class="w-12 h-8 bg-blue-600 rounded flex items-center justify-center">
+                                                <span class="text-white font-bold text-xs">VISA</span>
+                                            </div>
+                                            <div class="w-12 h-8 bg-red-500 rounded flex items-center justify-center">
+                                                <span class="text-white font-bold text-xs">MC</span>
+                                            </div>
+                                            <div class="w-12 h-8 bg-blue-800 rounded flex items-center justify-center">
+                                                <span class="text-white font-bold text-xs">AMEX</span>
+                                            </div>
+                                        </div>
+                                        <div id="tarjeta-paypal-container"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Efectivo Info -->
+                                <div id="efectivo-info" class="mt-4 bg-gray-50 p-4 rounded-lg" style="display:none;">
+                                    <h4 class="font-semibold text-gray-900 mb-3">Pago en Efectivo</h4>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="flex items-center text-green-600 mb-2">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            </svg>
+                                            <span class="font-semibold">Pago en Caja</span>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <p>El pago en efectivo se realizará directamente en la caja de la clínica.</p>
+                                            <p class="mt-2"><strong>Horario de atención:</strong> Lunes a Viernes 8:00 AM - 6:00 PM</p>
+                                            <p><strong>Ubicación:</strong> Recepción principal - Primer piso</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monto Total -->
+                            <div>
+                                <label for="{{ form.monto_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Monto Base *
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">$</span>
+                                    </div>
+                                    <input type="number" name="monto_total" id="{{ form.monto_total.id_for_label }}" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8" value="{{ form.monto_total.value|default:'' }}" required>
+                                </div>
+                                {% if form.monto_total.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.monto_total.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-sm text-gray-500">Monto base del servicio principal</p>
+                            </div>
+
+                            <!-- Estado -->
+                            <div>
+                                <label for="{{ form.estado.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Estado *
+                                </label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.estado.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Fecha de Pago -->
+                            <div>
+                                <label for="{{ form.fecha_pago.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Fecha de Pago *
+                                </label>
+                                {{ form.fecha_pago }}
+                                {% if form.fecha_pago.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.fecha_pago.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nombre del Pagador -->
+                            <div>
+                                <label for="{{ form.nombre_pagador.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombre del Pagador
+                                </label>
+                                {{ form.nombre_pagador }}
+                                {% if form.nombre_pagador.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.nombre_pagador.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Referencia Externa -->
+                            <div>
+                                <label for="{{ form.referencia_externa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Referencia Externa
+                                </label>
+                                {{ form.referencia_externa }}
+                                {% if form.referencia_externa.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.referencia_externa.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-sm text-gray-500">ID de transacción, referencia bancaria, etc.</p>
+                            </div>
+
+                            <!-- Evidencia de Pago -->
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="{{ form.evidencia_pago.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Evidencia de Pago
+                                </label>
+                                {{ form.evidencia_pago }}
+                                {% if form.evidencia_pago.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.evidencia_pago.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-sm text-gray-500">Suba comprobante de pago, captura de pantalla, etc.</p>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="{{ form.observaciones.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Observaciones
+                                </label>
+                                {{ form.observaciones }}
+                                {% if form.observaciones.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.observaciones.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Activo -->
+                            <div class="col-span-1 md:col-span-2">
+                                <div class="flex items-center">
+                                    {{ form.activo }}
+                                    <label for="{{ form.activo.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                                        Pago Activo
+                                    </label>
+                                </div>
+                                {% if form.activo.errors %}
+                                    <div class="mt-1 text-sm text-red-600">
+                                        {{ form.activo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles de Pago -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-semibold text-gray-900">
+                                <svg class="w-6 h-6 text-green-600 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                </svg>
+                                Detalles del Pago
+                            </h2>
+                            <button type="button" id="add-detail-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded inline-flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Agregar Detalle
+                            </button>
+                        </div>
+
+                        <div id="details-container" class="space-y-4">
+                            <!-- Formset management form -->
+                            <input type="hidden" name="form-TOTAL_FORMS" value="1" id="id_form-TOTAL_FORMS">
+                            <input type="hidden" name="form-INITIAL_FORMS" value="0" id="id_form-INITIAL_FORMS">
+                            <input type="hidden" name="form-MIN_NUM_FORMS" value="0" id="id_form-MIN_NUM_FORMS">
+                            <input type="hidden" name="form-MAX_NUM_FORMS" value="1000" id="id_form-MAX_NUM_FORMS">
+                            
+                            <!-- Template para nuevo detalle -->
+                            <div class="detail-form bg-white p-4 rounded border">
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-medium text-gray-900">Detalle 1</h3>
+                                    <button type="button" class="remove-detail-btn text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <!-- Servicio Adicional -->
+                                    <div>
+                                        <label for="id_form-0-servicio_adicional" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Servicio *
+                                        </label>
+                                        <select name="form-0-servicio_adicional" id="id_form-0-servicio_adicional" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="">Seleccionar servicio...</option>
+                                            <option value="consulta">Consulta médica</option>
+                                            <option value="radiografia">Radiografía</option>
+                                            <option value="laboratorio">Examen de laboratorio</option>
+                                            <option value="ecografia">Ecografía</option>
+                                            <option value="procedimiento">Procedimiento médico</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Cantidad -->
+                                    <div>
+                                        <label for="id_form-0-cantidad" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Cantidad *
+                                        </label>
+                                        <input type="number" name="form-0-cantidad" id="id_form-0-cantidad" value="1" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+
+                                    <!-- Precio Unitario -->
+                                    <div>
+                                        <label for="id_form-0-precio_unitario" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Precio Unitario *
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">$</span>
+                                            </div>
+                                            <input type="number" name="form-0-precio_unitario" id="id_form-0-precio_unitario" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8">
+                                        </div>
+                                    </div>
+
+                                    <!-- Descuento -->
+                                    <div>
+                                        <label for="id_form-0-descuento_porcentaje" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Descuento (%)
+                                        </label>
+                                        <input type="number" name="form-0-descuento_porcentaje" id="id_form-0-descuento_porcentaje" value="0" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+
+                                    <!-- Aplica Seguro -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            Seguro
+                                        </label>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="form-0-aplica_seguro" id="id_form-0-aplica_seguro" class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                            <label for="id_form-0-aplica_seguro" class="ml-2 block text-sm text-gray-700">
+                                                Aplica Seguro
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Valor Seguro -->
+                                    <div>
+                                        <label for="id_form-0-valor_seguro" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Monto Cubierto por Seguro
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">$</span>
+                                            </div>
+                                            <input type="number" name="form-0-valor_seguro" id="id_form-0-valor_seguro" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8" disabled>
+                                        </div>
+                                        <p class="mt-1 text-sm text-gray-500">Monto que cubre el seguro (se descuenta del total)</p>
+                                    </div>
+
+                                    <!-- Descripción Seguro -->
+                                    <div class="col-span-1 md:col-span-3">
+                                        <label for="id_form-0-descripcion_seguro" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Descripción del Seguro
+                                        </label>
+                                        <input type="text" name="form-0-descripcion_seguro" id="id_form-0-descripcion_seguro" placeholder="Saludsa Nivel 2, etc." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+                                </div>
+
+                                <!-- Campos ocultos -->
+                                <input type="hidden" name="form-0-id" id="id_form-0-id">
+                                <input type="hidden" name="form-0-DELETE" id="id_form-0-DELETE">
+                                
+                <!-- Subtotal calculado -->
+                <div class="mt-4 p-3 bg-gray-50 rounded">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span>Subtotal base:</span>
+                        <span class="subtotal-base font-medium">$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-1 seguro-descuento" style="display: none;">
+                        <span class="text-green-600">Descuento seguro:</span>
+                        <span class="descuento-seguro font-medium text-green-600">-$0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm border-t pt-1">
+                        <span class="font-semibold">Subtotal final:</span>
+                        <span class="subtotal font-semibold">$0.00</span>
+                    </div>
+                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total General -->
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-700">Monto Base:</span>
+                                    <span class="font-medium text-gray-900" id="monto-base-display">$0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-700">Servicios Adicionales:</span>
+                                    <span class="font-medium text-gray-900" id="servicios-adicionales-display">$0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm" id="total-seguro-row" style="display: none;">
+                                    <span class="text-green-700">Total cubierto por seguro:</span>
+                                    <span class="font-medium text-green-600" id="total-seguro-display">-$0.00</span>
+                                </div>
+                                <div class="border-t pt-2">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-lg font-semibold text-gray-900">Total a Pagar:</h3>
+                                        <div class="text-2xl font-bold text-blue-600" id="total-general">$0.00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Pago (si existe) -->
+                    {% if object %}
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-medium text-gray-900 mb-3">Información de la Atención</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="text-sm text-gray-500">Paciente</div>
+                                    <div class="font-medium">{{ object.atencion.paciente.get_full_name }}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="text-sm text-gray-500">Doctor</div>
+                                    <div class="font-medium">{{ object.atencion.doctor.get_full_name }}</div>
+                                </div>
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="text-sm text-gray-500">Fecha Atención</div>
+                                    <div class="font-medium">{{ object.atencion.fecha_atencion|date:"d/m/Y" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Form errors -->
+                    {% if form.non_field_errors %}
+                        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">Error en el formulario</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                        <a href="{% url 'doctor:pago_list' %}" 
+                           class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            {% if object %}
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                </svg>
+                                Actualizar Pago
+                            {% else %}
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Crear Pago
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales
+    let detailCounter = 1;
+    const totalFormsInput = document.querySelector('input[name="form-TOTAL_FORMS"]');
+
+    // Función para actualizar contador de formularios
+    function updateFormsetCounts() {
+        const forms = document.querySelectorAll('.detail-form');
+        if (totalFormsInput) {
+            totalFormsInput.value = forms.length;
+        }
+        
+        // Actualizar índices de formularios
+        forms.forEach((form, index) => {
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(/form-\d+/, `form-${index}`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(/form-\d+/, `form-${index}`);
+                }
+            });
+            
+            const labels = form.querySelectorAll('label');
+            labels.forEach(label => {
+                if (label.getAttribute('for')) {
+                    label.setAttribute('for', label.getAttribute('for').replace(/form-\d+/, `form-${index}`));
+                }
+            });
+            
+            // Actualizar título
+            const title = form.querySelector('h3');
+            if (title) {
+                title.textContent = `Detalle ${index + 1}`;
+            }
+        });
+    }
+
+    // Función para calcular subtotal de un detalle
+    function calculateSubtotal(detailForm) {
+        const cantidadInput = detailForm.querySelector('input[name*="cantidad"]');
+        const precioInput = detailForm.querySelector('input[name*="precio_unitario"]');
+        const descuentoInput = detailForm.querySelector('input[name*="descuento_porcentaje"]');
+        const valorSeguroInput = detailForm.querySelector('input[name*="valor_seguro"]');
+        const aplicaSeguroInput = detailForm.querySelector('input[name*="aplica_seguro"]');
+        const subtotalDisplay = detailForm.querySelector('.subtotal');
+        const subtotalBaseDisplay = detailForm.querySelector('.subtotal-base');
+        const descuentoSeguroDisplay = detailForm.querySelector('.descuento-seguro');
+        const seguroDescuentoDiv = detailForm.querySelector('.seguro-descuento');
+
+        if (cantidadInput && precioInput && subtotalDisplay) {
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const precio = parseFloat(precioInput.value) || 0;
+            const descuento = parseFloat(descuentoInput.value) || 0;
+            const valorSeguro = parseFloat(valorSeguroInput.value) || 0;
+            const aplicaSeguro = aplicaSeguroInput.checked;
+
+            let subtotalBase = cantidad * precio;
+            
+            // Aplicar descuento porcentual
+            if (descuento > 0) {
+                subtotalBase = subtotalBase * (1 - descuento / 100);
+            }
+
+            let subtotalFinal = subtotalBase;
+            let descuentoSeguroMonto = 0;
+
+            // Aplicar seguro si está marcado
+            if (aplicaSeguro && valorSeguro > 0) {
+                descuentoSeguroMonto = Math.min(valorSeguro, subtotalBase); // No puede ser mayor al subtotal
+                subtotalFinal = subtotalBase - descuentoSeguroMonto;
+            }
+
+            // Actualizar displays
+            if (subtotalBaseDisplay) {
+                subtotalBaseDisplay.textContent = `$${subtotalBase.toFixed(2)}`;
+            }
+            
+            if (descuentoSeguroDisplay) {
+                descuentoSeguroDisplay.textContent = `-$${descuentoSeguroMonto.toFixed(2)}`;
+            }
+            
+            if (seguroDescuentoDiv) {
+                seguroDescuentoDiv.style.display = aplicaSeguro && valorSeguro > 0 ? 'flex' : 'none';
+            }
+
+            subtotalDisplay.textContent = `$${subtotalFinal.toFixed(2)}`;
+            return subtotalFinal;
+        }
+        return 0;
+    }
+
+    // Función para calcular total general
+    function calculateTotal() {
+        // Obtener monto base
+        const montoBaseInput = document.querySelector('input[name="monto_total"]');
+        const montoBase = parseFloat(montoBaseInput?.value) || 0;
+        
+        // Calcular total de servicios adicionales y seguro
+        let totalServicios = 0;
+        let totalSeguro = 0;
+        const detailForms = document.querySelectorAll('.detail-form');
+        
+        detailForms.forEach(form => {
+            const subtotal = calculateSubtotal(form);
+            totalServicios += subtotal;
+            
+            // Calcular seguro aplicado
+            const aplicaSeguroInput = form.querySelector('input[name*="aplica_seguro"]');
+            const valorSeguroInput = form.querySelector('input[name*="valor_seguro"]');
+            
+            if (aplicaSeguroInput && aplicaSeguroInput.checked && valorSeguroInput) {
+                const valorSeguro = parseFloat(valorSeguroInput.value) || 0;
+                totalSeguro += valorSeguro;
+            }
+        });
+
+        // Actualizar displays
+        const montoBaseDisplay = document.getElementById('monto-base-display');
+        const serviciosDisplay = document.getElementById('servicios-adicionales-display');
+        const totalSeguroDisplay = document.getElementById('total-seguro-display');
+        const totalSeguroRow = document.getElementById('total-seguro-row');
+        const totalDisplay = document.getElementById('total-general');
+        
+        if (montoBaseDisplay) {
+            montoBaseDisplay.textContent = `$${montoBase.toFixed(2)}`;
+        }
+        
+        if (serviciosDisplay) {
+            serviciosDisplay.textContent = `$${totalServicios.toFixed(2)}`;
+        }
+        
+        if (totalSeguroDisplay) {
+            totalSeguroDisplay.textContent = `-$${totalSeguro.toFixed(2)}`;
+        }
+        
+        if (totalSeguroRow) {
+            totalSeguroRow.style.display = totalSeguro > 0 ? 'flex' : 'none';
+        }
+
+        const totalGeneral = montoBase + totalServicios;
+        if (totalDisplay) {
+            totalDisplay.textContent = `$${totalGeneral.toFixed(2)}`;
+        }
+
+        return totalGeneral;
+    }
+
+    // Función para agregar eventos a un formulario de detalle
+    function addDetailEvents(detailForm) {
+        const inputs = detailForm.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                calculateSubtotal(detailForm);
+                calculateTotal();
+            });
+        });
+
+        const seguroCheckbox = detailForm.querySelector('input[name*="aplica_seguro"]');
+        const valorSeguroInput = detailForm.querySelector('input[name*="valor_seguro"]');
+        
+        if (seguroCheckbox && valorSeguroInput) {
+            // Función para habilitar/deshabilitar el campo de valor del seguro
+            function toggleSeguroInput() {
+                if (seguroCheckbox.checked) {
+                    valorSeguroInput.disabled = false;
+                    valorSeguroInput.parentElement.parentElement.style.opacity = '1';
+                } else {
+                    valorSeguroInput.disabled = true;
+                    valorSeguroInput.value = '0';
+                    valorSeguroInput.parentElement.parentElement.style.opacity = '0.6';
+                }
+                calculateSubtotal(detailForm);
+                calculateTotal();
+            }
+            
+            // Inicializar estado
+            toggleSeguroInput();
+            
+            seguroCheckbox.addEventListener('change', toggleSeguroInput);
+        }
+
+        const removeBtn = detailForm.querySelector('.remove-detail-btn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function() {
+                if (document.querySelectorAll('.detail-form').length > 1) {
+                    detailForm.remove();
+                    updateFormsetCounts();
+                    calculateTotal();
+                }
+            });
+        }
+    }
+
+    // Función para agregar nuevo detalle
+    function addNewDetail() {
+        const container = document.getElementById('details-container');
+        const newForm = document.createElement('div');
+        newForm.className = 'detail-form bg-white p-4 rounded border';
+        newForm.innerHTML = `
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-medium text-gray-900">Detalle ${detailCounter + 1}</h3>
+                <button type="button" class="remove-detail-btn text-red-600 hover:text-red-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="id_form-${detailCounter}-servicio_adicional" class="block text-sm font-medium text-gray-700 mb-1">
+                        Servicio *
+                    </label>
+                    <select name="form-${detailCounter}-servicio_adicional" id="id_form-${detailCounter}-servicio_adicional" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Seleccionar servicio...</option>
+                        <option value="consulta">Consulta médica</option>
+                        <option value="radiografia">Radiografía</option>
+                        <option value="laboratorio">Examen de laboratorio</option>
+                        <option value="ecografia">Ecografía</option>
+                        <option value="procedimiento">Procedimiento médico</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="id_form-${detailCounter}-cantidad" class="block text-sm font-medium text-gray-700 mb-1">
+                        Cantidad *
+                    </label>
+                    <input type="number" name="form-${detailCounter}-cantidad" id="id_form-${detailCounter}-cantidad" value="1" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="id_form-${detailCounter}-precio_unitario" class="block text-sm font-medium text-gray-700 mb-1">
+                        Precio Unitario *
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input type="number" name="form-${detailCounter}-precio_unitario" id="id_form-${detailCounter}-precio_unitario" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8">
+                    </div>
+                </div>
+                <div>
+                    <label for="id_form-${detailCounter}-descuento_porcentaje" class="block text-sm font-medium text-gray-700 mb-1">
+                        Descuento (%)
+                    </label>
+                    <input type="number" name="form-${detailCounter}-descuento_porcentaje" id="id_form-${detailCounter}-descuento_porcentaje" value="0" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Seguro
+                    </label>
+                    <div class="flex items-center">
+                        <input type="checkbox" name="form-${detailCounter}-aplica_seguro" id="id_form-${detailCounter}-aplica_seguro" class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="id_form-${detailCounter}-aplica_seguro" class="ml-2 block text-sm text-gray-700">
+                            Aplica Seguro
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label for="id_form-${detailCounter}-valor_seguro" class="block text-sm font-medium text-gray-700 mb-1">
+                        Monto Cubierto por Seguro
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">$</span>
+                        </div>
+                        <input type="number" name="form-${detailCounter}-valor_seguro" id="id_form-${detailCounter}-valor_seguro" value="0" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 pl-8" disabled>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Monto que cubre el seguro (se descuenta del total)</p>
+                </div>
+                <div class="col-span-1 md:col-span-3">
+                    <label for="id_form-${detailCounter}-descripcion_seguro" class="block text-sm font-medium text-gray-700 mb-1">
+                        Descripción del Seguro
+                    </label>
+                    <input type="text" name="form-${detailCounter}-descripcion_seguro" id="id_form-${detailCounter}-descripcion_seguro" placeholder="Saludsa Nivel 2, etc." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+            </div>
+            <input type="hidden" name="form-${detailCounter}-id" id="id_form-${detailCounter}-id">
+            <input type="hidden" name="form-${detailCounter}-DELETE" id="id_form-${detailCounter}-DELETE">
+            <div class="mt-4 p-3 bg-gray-50 rounded">
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Subtotal base:</span>
+                    <span class="subtotal-base font-medium">$0.00</span>
+                </div>
+                <div class="flex justify-between text-sm mb-1 seguro-descuento" style="display: none;">
+                    <span class="text-green-600">Descuento seguro:</span>
+                    <span class="descuento-seguro font-medium text-green-600">-$0.00</span>
+                </div>
+                <div class="flex justify-between text-sm border-t pt-1">
+                    <span class="font-semibold">Subtotal final:</span>
+                    <span class="subtotal font-semibold">$0.00</span>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(newForm);
+        detailCounter++;
+        updateFormsetCounts();
+        addDetailEvents(newForm);
+    }
+
+    // Evento para agregar detalle
+    const addDetailBtn = document.getElementById('add-detail-btn');
+    if (addDetailBtn) {
+        addDetailBtn.addEventListener('click', addNewDetail);
+    }
+
+    // Agregar eventos a formularios existentes
+    document.querySelectorAll('.detail-form').forEach(addDetailEvents);
+
+    // Agregar evento al monto base para recalcular total
+    const montoBaseInput = document.querySelector('input[name="monto_total"]');
+    if (montoBaseInput) {
+        montoBaseInput.addEventListener('input', calculateTotal);
+        montoBaseInput.addEventListener('change', calculateTotal);
+    }
+
+    // Calcular total inicial
+    calculateTotal();
+
+    // Manejar métodos de pago
+    const metodoPagoSelect = document.querySelector('select[name="metodo_pago"]');
+    const paypalContainer = document.getElementById('paypal-container');
+    const transferenciaInfo = document.getElementById('transferencia-info');
+    const tarjetaInfo = document.getElementById('tarjeta-info');
+    const efectivoInfo = document.getElementById('efectivo-info');
+
+    function togglePaymentMethods() {
+        const metodo = metodoPagoSelect ? metodoPagoSelect.value.toLowerCase() : '';
+        
+        // Ocultar todos los métodos primero
+        [paypalContainer, transferenciaInfo, tarjetaInfo, efectivoInfo].forEach(element => {
+            if (element) element.style.display = 'none';
+        });
+
+        // Mostrar el método seleccionado
+        switch(metodo) {
+            case 'paypal':
+                if (paypalContainer) {
+                    paypalContainer.style.display = 'block';
+                    loadPayPalScript();
+                }
+                break;
+            case 'transferencia':
+                if (transferenciaInfo) {
+                    transferenciaInfo.style.display = 'block';
+                }
+                break;
+            case 'tarjeta':
+                if (tarjetaInfo) {
+                    tarjetaInfo.style.display = 'block';
+                    loadPayPalCardScript();
+                }
+                break;
+            case 'efectivo':
+                if (efectivoInfo) {
+                    efectivoInfo.style.display = 'block';
+                }
+                break;
+        }
+    }
+
+    function loadPayPalScript() {
+        // Verificar si el script ya existe
+        if (document.getElementById('paypal-sdk')) {
+            initPayPalButtons();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = 'paypal-sdk';
+        script.src = 'https://www.paypal.com/sdk/js?client-id=AW5CkdenEUQ6vX8On2KwNSrkMrEsWGIxVWsCO4usjNT2ru7VoSz-HCVT79egvaHmyNLDfop-sYgowR1M&currency=USD&commit=true&intent=capture';
+        script.onload = initPayPalButtons;
+        script.onerror = function() {
+            console.error('Error loading PayPal SDK');
+            const container = document.getElementById('paypal-button-container');
+            if (container) {
+                container.innerHTML = '<div class="text-red-600 text-sm">Error al cargar PayPal. Intente con otro método de pago.</div>';
+            }
+        };
+        document.head.appendChild(script);
+    }
+
+    function loadPayPalCardScript() {
+        // Verificar si el script ya existe
+        if (document.getElementById('paypal-sdk')) {
+            initPayPalCardButtons();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = 'paypal-sdk';
+        script.src = 'https://www.paypal.com/sdk/js?client-id=AW5CkdenEUQ6vX8On2KwNSrkMrEsWGIxVWsCO4usjNT2ru7VoSz-HCVT79egvaHmyNLDfop-sYgowR1M&currency=USD&commit=true&intent=capture';
+        script.onload = initPayPalCardButtons;
+        script.onerror = function() {
+            console.error('Error loading PayPal SDK for cards');
+            const container = document.getElementById('tarjeta-paypal-container');
+            if (container) {
+                container.innerHTML = '<div class="text-red-600 text-sm">Error al cargar procesador de tarjetas. Intente con otro método de pago.</div>';
+            }
+        };
+        document.head.appendChild(script);
+    }
+
+    function initPayPalButtons() {
+        if (!window.paypal) {
+            console.error('PayPal SDK not loaded');
+            return;
+        }
+
+        const container = document.getElementById('paypal-button-container');
+        if (!container) return;
+
+        // Limpiar contenedor
+        container.innerHTML = '';
+
+        window.paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color: 'blue',
+                shape: 'rect',
+                label: 'paypal'
+            },
+            createOrder: function(data, actions) {
+                const totalGeneral = calculateTotal();
+                const monto = totalGeneral > 0 ? totalGeneral : 0.01;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: monto.toFixed(2),
+                            currency_code: 'USD'
+                        },
+                        description: 'Pago de servicios médicos'
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Llenar referencia externa con transaction ID
+                    const referenciaInput = document.querySelector('input[name="referencia_externa"]');
+                    if (referenciaInput) {
+                        referenciaInput.value = details.id;
+                    }
+                    
+                    // Cambiar estado a pagado
+                    const estadoSelect = document.querySelector('select[name="estado"]');
+                    if (estadoSelect) {
+                        estadoSelect.value = 'pagado';
+                    }
+                    
+                    // Llenar nombre del pagador
+                    const pagadorInput = document.querySelector('input[name="nombre_pagador"]');
+                    if (pagadorInput && !pagadorInput.value) {
+                        pagadorInput.value = details.payer.name.given_name + ' ' + (details.payer.name.surname || '');
+                    }
+
+                    alert('¡Pago realizado exitosamente! ID: ' + details.id);
+                });
+            },
+            onError: function(err) {
+                console.error('PayPal Error:', err);
+                alert('Error al procesar el pago con PayPal. Por favor, intente de nuevo.');
+            },
+            onCancel: function(data) {
+                alert('Pago cancelado por el usuario.');
+            }
+        }).render('#paypal-button-container');
+    }
+
+    function initPayPalCardButtons() {
+        if (!window.paypal) {
+            console.error('PayPal SDK not loaded');
+            return;
+        }
+
+        const container = document.getElementById('tarjeta-paypal-container');
+        if (!container) return;
+
+        // Limpiar contenedor
+        container.innerHTML = '';
+
+        window.paypal.Buttons({
+            style: {
+                layout: 'vertical',
+                color: 'black',
+                shape: 'rect',
+                label: 'pay'
+            },
+            fundingSource: window.paypal.FUNDING.CARD,
+            createOrder: function(data, actions) {
+                const totalGeneral = calculateTotal();
+                const monto = totalGeneral > 0 ? totalGeneral : 0.01;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: monto.toFixed(2),
+                            currency_code: 'USD'
+                        },
+                        description: 'Pago de servicios médicos - Tarjeta'
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Llenar referencia externa con transaction ID
+                    const referenciaInput = document.querySelector('input[name="referencia_externa"]');
+                    if (referenciaInput) {
+                        referenciaInput.value = details.id;
+                    }
+                    
+                    // Cambiar estado a pagado
+                    const estadoSelect = document.querySelector('select[name="estado"]');
+                    if (estadoSelect) {
+                        estadoSelect.value = 'pagado';
+                    }
+                    
+                    // Llenar nombre del pagador
+                    const pagadorInput = document.querySelector('input[name="nombre_pagador"]');
+                    if (pagadorInput && !pagadorInput.value) {
+                        pagadorInput.value = details.payer.name.given_name + ' ' + (details.payer.name.surname || '');
+                    }
+
+                    alert('¡Pago con tarjeta realizado exitosamente! ID: ' + details.id);
+                });
+            },
+            onError: function(err) {
+                console.error('PayPal Card Error:', err);
+                alert('Error al procesar el pago con tarjeta. Por favor, intente de nuevo.');
+            },
+            onCancel: function(data) {
+                alert('Pago cancelado por el usuario.');
+            }
+        }).render('#tarjeta-paypal-container');
+    }
+
+    // Inicializar eventos de método de pago
+    if (metodoPagoSelect) {
+        metodoPagoSelect.addEventListener('change', togglePaymentMethods);
+        // Ejecutar al cargar la página
+        togglePaymentMethods();
+    }
+
+    // Configurar fecha por defecto
+    const fechaPagoInput = document.querySelector('input[name="fecha_pago"]');
+    if (fechaPagoInput && !fechaPagoInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        fechaPagoInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    // Validación del formato de moneda
+    const montoInput = document.querySelector('input[name="monto_total"]');
+    if (montoInput) {
+        montoInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d.]/g, '');
+            value = value.replace(/(\..*)\./g, '$1');
+            e.target.value = value;
+        });
+        montoInput.addEventListener('blur', function(e) {
+            if (e.target.value) {
+                e.target.value = parseFloat(e.target.value).toFixed(2);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

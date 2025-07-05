@@ -1,0 +1,795 @@
+{% load static %}
+
+<!-- Widget Flotante del Chatbot -->
+<div id="chatbot-widget" class="chatbot-widget">
+    <!-- Botón flotante -->
+    <button id="chatbot-toggle" class="chatbot-toggle" title="Abrir Asistente IA">
+        <i class="fas fa-robot"></i>
+        <span class="chatbot-notification" id="chatbot-notification">1</span>
+    </button>
+    
+    <!-- Ventana del chat -->
+    <div id="chatbot-window" class="chatbot-window">
+        <!-- Header -->
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <h5>Asistente IA</h5>
+                    <small id="chatbot-status">IA Conectada</small>
+                </div>
+            </div>
+            <button id="clear-history-btn" class="chatbot-clear-btn" title="Limpiar historial del chat" style="display: none;">
+                <i class="fas fa-trash"></i>
+            </button>
+            <button id="chatbot-close" class="chatbot-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Mensajes -->
+        <div id="chatbot-messages" class="chatbot-messages">
+            <!-- Mensaje de bienvenida -->
+            <div class="chatbot-message bot welcome-message">
+                <div class="chatbot-avatar">🤖</div>
+                <div class="chatbot-content">
+                    <div>¡Hola! Soy tu asistente IA clínico. Puedo ayudarte con consultas, información médica y crear formularios para pacientes, citas, medicamentos y más. ¿En qué puedo asistirte?</div>
+                    <div class="chatbot-time">Ahora</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input -->
+        <div class="chatbot-input-container">
+            <form id="chatbot-form" class="chatbot-input-form">
+                <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." autocomplete="off">
+                <button type="submit" id="chatbot-send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.chatbot-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    font-family: 'Inter', sans-serif;
+}
+
+.chatbot-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,123,255,0.3);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0,123,255,0.4);
+}
+
+.chatbot-toggle i {
+    font-size: 24px;
+}
+
+.chatbot-notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.chatbot-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.chatbot-window.show {
+    display: flex;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chatbot-header-info i {
+    font-size: 20px;
+}
+
+.chatbot-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chatbot-header small {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.chatbot-clear-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    margin-right: 5px;
+}
+
+.chatbot-clear-btn:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.chatbot-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.chatbot-close:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.chatbot-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.chatbot-message {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: flex-start;
+}
+
+.chatbot-message.user {
+    flex-direction: row-reverse;
+}
+
+.chatbot-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.chatbot-message.user .chatbot-avatar {
+    background: #007bff;
+    color: white;
+}
+
+.chatbot-message.bot .chatbot-avatar {
+    background: #28a745;
+    color: white;
+}
+
+.chatbot-content {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    word-wrap: break-word;
+}
+
+.chatbot-message.user .chatbot-content {
+    background: #007bff;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.chatbot-message.bot .chatbot-content {
+    background: white;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-bottom-left-radius: 4px;
+}
+
+.chatbot-time {
+    font-size: 11px;
+    margin-top: 5px;
+    opacity: 0.7;
+}
+
+.chatbot-input-container {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+.chatbot-input-form {
+    display: flex;
+    gap: 10px;
+}
+
+.chatbot-input-form input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.chatbot-input-form input:focus {
+    border-color: #007bff;
+}
+
+.chatbot-input-form button {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.chatbot-input-form button:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.chatbot-input-form button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.chatbot-action-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 6px 12px;
+    margin: 8px 4px 0 0;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+}
+
+.chatbot-action-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.chatbot-quick-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 4px 8px;
+    margin: 2px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.chatbot-quick-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chatbot-window {
+        width: 300px;
+        height: 400px;
+        bottom: 70px;
+    }
+    
+    .chatbot-widget {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .chatbot-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .chatbot-toggle i {
+        font-size: 20px;
+    }
+}
+</style>
+</style>
+
+<script>
+class ChatbotWidget {
+    constructor() {
+        this.isOpen = false;
+        this.isTyping = false;
+        this.messagesContainer = document.getElementById('chatbot-messages');
+        this.inputField = document.getElementById('chatbot-input');
+        this.form = document.getElementById('chatbot-form');
+        this.sendButton = document.getElementById('chatbot-send');
+        this.notification = document.getElementById('chatbot-notification');
+        this.storageKey = 'chatbot_history';
+        this.maxMessages = 50; // Limitar el número de mensajes guardados
+        
+        this.init();
+    }
+    
+    init() {
+        // Event listeners
+        document.getElementById('chatbot-toggle').addEventListener('click', () => this.toggle());
+        document.getElementById('chatbot-close').addEventListener('click', () => this.close());
+        this.form.addEventListener('submit', (e) => this.sendMessage(e));
+        
+        // Cargar historial guardado
+        this.loadChatHistory();
+        
+        // Verificar estado de IA
+        this.checkIAStatus();
+        
+        // Ocultar notificación inicial después de 3 segundos
+        setTimeout(() => {
+            this.notification.style.display = 'none';
+        }, 3000);
+        
+        // Agregar botón para limpiar historial
+        this.addClearHistoryButton();
+    }
+    
+    loadChatHistory() {
+        try {
+            const savedHistory = localStorage.getItem(this.storageKey);
+            if (savedHistory) {
+                const messages = JSON.parse(savedHistory);
+                
+                // Limpiar mensajes existentes (excepto el mensaje de bienvenida)
+                const welcomeMessage = this.messagesContainer.querySelector('.chatbot-message.bot');
+                this.messagesContainer.innerHTML = '';
+                
+                // Restaurar mensaje de bienvenida
+                if (welcomeMessage) {
+                    this.messagesContainer.appendChild(welcomeMessage);
+                }
+                
+                // Cargar mensajes guardados
+                messages.forEach(msg => {
+                    this.addMessageToDOM(msg.content, msg.type, msg.timestamp);
+                });
+                
+                this.scrollToBottom();
+            }
+        } catch (error) {
+            console.warn('Error cargando historial del chat:', error);
+        }
+    }
+    
+    saveChatHistory() {
+        try {
+            const messages = [];
+            const messageElements = this.messagesContainer.querySelectorAll('.chatbot-message:not(.welcome-message)');
+            
+            messageElements.forEach(element => {
+                const type = element.classList.contains('user') ? 'user' : 'bot';
+                const contentElement = element.querySelector('.chatbot-content > div:first-child');
+                const timeElement = element.querySelector('.chatbot-time');
+                
+                if (contentElement && timeElement) {
+                    messages.push({
+                        content: contentElement.innerHTML,
+                        type: type,
+                        timestamp: timeElement.textContent
+                    });
+                }
+            });
+            
+            // Limitar número de mensajes guardados
+            const limitedMessages = messages.slice(-this.maxMessages);
+            localStorage.setItem(this.storageKey, JSON.stringify(limitedMessages));
+        } catch (error) {
+            console.warn('Error guardando historial del chat:', error);
+        }
+    }
+    
+    clearChatHistory() {
+        if (confirm('¿Estás seguro de que quieres borrar todo el historial del chat?')) {
+            try {
+                localStorage.removeItem(this.storageKey);
+                
+                // Limpiar mensajes del DOM
+                this.messagesContainer.innerHTML = '';
+                
+                // Restaurar mensaje de bienvenida
+                this.addWelcomeMessage();
+                
+                // Ocultar el botón de limpiar historial
+                const clearButton = document.getElementById('clear-history-btn');
+                if (clearButton) {
+                    clearButton.style.display = 'none';
+                }
+            } catch (error) {
+                console.warn('Error limpiando historial del chat:', error);
+            }
+        }
+    }
+    
+    addWelcomeMessage() {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'chatbot-message bot welcome-message';
+        messageDiv.innerHTML = `
+            <div class="chatbot-avatar">🤖</div>
+            <div class="chatbot-content">
+                <div>¡Hola! Soy tu asistente IA clínico. Puedo ayudarte con consultas, información médica y crear formularios para pacientes, citas, medicamentos y más. ¿En qué puedo asistirte?</div>
+                <div class="chatbot-time">Ahora</div>
+            </div>
+        `;
+        this.messagesContainer.appendChild(messageDiv);
+    }
+    
+    addClearHistoryButton() {
+        const headerInfo = document.querySelector('.chatbot-header-info');
+        if (headerInfo) {
+            const clearButton = document.createElement('button');
+            clearButton.id = 'clear-history-btn';
+            clearButton.innerHTML = '<i class="fas fa-trash"></i>';
+            clearButton.className = 'chatbot-clear-btn';
+            clearButton.title = 'Limpiar historial del chat';
+            clearButton.style.display = 'none'; // Oculto por defecto
+            clearButton.addEventListener('click', () => this.clearChatHistory());
+            
+            // Insertar después del div de información
+            headerInfo.parentNode.insertBefore(clearButton, headerInfo.nextSibling);
+            
+            // Mostrar botón si hay mensajes guardados
+            this.checkIfHistoryExists();
+        }
+    }
+    
+    
+    checkIfHistoryExists() {
+        try {
+            const savedHistory = localStorage.getItem(this.storageKey);
+            const clearButton = document.getElementById('clear-history-btn');
+            
+            if (savedHistory && JSON.parse(savedHistory).length > 0 && clearButton) {
+                clearButton.style.display = 'block';
+            }
+        } catch (error) {
+            console.warn('Error verificando historial:', error);
+        }
+    }
+    
+    toggle() {
+        this.isOpen = !this.isOpen;
+        const window = document.getElementById('chatbot-window');
+        
+        if (this.isOpen) {
+            window.classList.add('show');
+            this.inputField.focus();
+            this.notification.style.display = 'none';
+        } else {
+            window.classList.remove('show');
+        }
+    }
+    
+    close() {
+        this.isOpen = false;
+        document.getElementById('chatbot-window').classList.remove('show');
+    }
+    
+    async sendMessage(event) {
+        event.preventDefault();
+        
+        const message = this.inputField.value.trim();
+        if (!message) return;
+        
+        // Mostrar mensaje del usuario
+        this.addMessage(message, 'user');
+        this.inputField.value = '';
+        this.setLoading(true);
+        
+        try {
+            const response = await fetch('/chatbot/api/mensaje/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCsrfToken()
+                },
+                body: JSON.stringify({ mensaje: message })
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Error en el servidor');
+            }
+            
+            this.processIAResponse(data);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            this.addMessage('Lo siento, ocurrió un error. Por favor, intenta de nuevo.', 'bot');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+    
+    processIAResponse(data) {
+        let content = data.respuesta;
+        
+        // NO agregar botón genérico si ya hay botones contextuales específicos
+        // Los botones contextuales manejan esto mejor
+        
+        // Agregar botones contextuales basados en el tipo de respuesta
+        let contextualButtons = this.getContextualButtons(data);
+        
+        // Solo mostrar formularios cuando es relevante Y no hay botones contextuales específicos
+        const shouldShowFormButtons = this.shouldShowFormButtons(data) && !contextualButtons;
+        
+        if (contextualButtons || shouldShowFormButtons) {
+            content += `
+                <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                    ${contextualButtons}
+                    ${shouldShowFormButtons ? `
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 8px;">Formularios disponibles:</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                            <button class="chatbot-quick-btn" onclick="window.open('/core/paciente/add/', '_blank')">👥 Paciente</button>
+                            <button class="chatbot-quick-btn" onclick="window.open('/doctor/cita_medica/add/', '_blank')">📅 Cita</button>
+                            <button class="chatbot-quick-btn" onclick="window.open('/core/doctor/add/', '_blank')">👨‍⚕️ Doctor</button>
+                            <button class="chatbot-quick-btn" onclick="window.open('/core/medicamento/add/', '_blank')">💊 Medicamento</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        this.addMessage(content, 'bot');
+    }
+    
+    getContextualButtons(data) {
+        let buttons = '';
+        
+        // Botones para consultas a BD
+        if (data.accion === 'consulta_bd') {
+            // Botones específicos según el tipo de consulta
+            if (data.respuesta && data.respuesta.includes('citas')) {
+                buttons += `<button class="chatbot-action-btn" onclick="window.open('/doctor/cita_medica/', '_blank')" style="margin-right: 5px;">📅 Ver Todas las Citas</button>`;
+            }
+            
+            if (data.respuesta && data.respuesta.includes('pacientes')) {
+                buttons += `<button class="chatbot-action-btn" onclick="window.open('/core/paciente/', '_blank')" style="margin-right: 5px;">👥 Ver Todos los Pacientes</button>`;
+            }
+            
+            if (data.respuesta && data.respuesta.includes('doctores')) {
+                buttons += `<button class="chatbot-action-btn" onclick="window.open('/core/doctor/', '_blank')" style="margin-right: 5px;">👨‍⚕️ Ver Todos los Doctores</button>`;
+            }
+            
+            if (data.respuesta && (data.respuesta.includes('estadísticas') || data.respuesta.includes('general'))) {
+                buttons += `<button class="chatbot-action-btn" onclick="window.open('/doctor/atencion/', '_blank')" style="margin-right: 5px;">🩺 Ver Atenciones</button>`;
+            }
+        }
+        
+        // Botones específicos para creación de entidades
+        else if (['paciente', 'doctor', 'cita', 'medicamento', 'atencion'].includes(data.accion)) {
+            const entityButtons = {
+                'paciente': {icon: '👥', text: 'Crear Paciente', url: '/core/pacientes/crear/'},
+                'doctor': {icon: '👨‍⚕️', text: 'Crear Doctor', url: '/core/doctores/crear/'},
+                'cita': {icon: '📅', text: 'Crear Cita', url: '/doctor/cita_medica/crear/'},
+                'medicamento': {icon: '💊', text: 'Crear Medicamento', url: '/core/medicamentos/crear/'},
+                'atencion': {icon: '🩺', text: 'Nueva Atención', url: '/doctor/atenciones/crear/'}
+            };
+            
+            const entity = entityButtons[data.accion];
+            if (entity) {
+                // Si hay URL con parámetros, usarla; sino usar la URL base
+                const finalUrl = data.formulario_url || entity.url;
+                buttons += `<button class="chatbot-action-btn" onclick="window.open('${finalUrl}', '_blank')" style="margin-right: 5px;">${entity.icon} ${entity.text}</button>`;
+            }
+        }
+        
+        if (buttons) {
+            return `<div style="margin-bottom: 10px;">${buttons}</div>`;
+        }
+        
+        return '';
+    }
+    
+    shouldShowFormButtons(data) {
+        // Lógica simplificada y más robusta
+        
+        // NO mostrar para consultas a BD
+        if (data.accion === 'consulta_bd') {
+            return false;
+        }
+        
+        // NO mostrar para errores
+        if (data.error_fallback || data.limite_alcanzado) {
+            return false;
+        }
+        
+        // SÍ mostrar para creación de entidades (prioridad máxima)
+        if (['paciente', 'doctor', 'cita', 'medicamento', 'atencion'].includes(data.accion)) {
+            return true;
+        }
+        
+        // SÍ mostrar si hay URL de formulario
+        if (data.formulario_url) {
+            return true;
+        }
+        
+        // SÍ mostrar si la respuesta indica creación exitosa
+        const respuesta = (data.respuesta || '').toLowerCase();
+        if (respuesta.includes('creado') || respuesta.includes('registrado') || 
+            respuesta.includes('éxito') || respuesta.includes('exitoso')) {
+            return true;
+        }
+        
+        // Por defecto NO mostrar
+        return false;
+    }
+    
+    addMessage(content, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chatbot-message ${type}`;
+        
+        const avatar = type === 'user' ? '👤' : '🤖';
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        messageDiv.innerHTML = `
+            <div class="chatbot-avatar">${avatar}</div>
+            <div class="chatbot-content">
+                <div>${content}</div>
+                <div class="chatbot-time">${time}</div>
+            </div>
+        `;
+        
+        this.messagesContainer.appendChild(messageDiv);
+        this.scrollToBottom();
+        
+        // Guardar historial después de agregar mensaje
+        this.saveChatHistory();
+        
+        // Mostrar botón de limpiar historial si hay mensajes
+        const clearButton = document.getElementById('clear-history-btn');
+        if (clearButton) {
+            clearButton.style.display = 'block';
+        }
+    }
+    
+    addMessageToDOM(content, type, timestamp) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chatbot-message ${type}`;
+        
+        const avatar = type === 'user' ? '👤' : '🤖';
+        
+        messageDiv.innerHTML = `
+            <div class="chatbot-avatar">${avatar}</div>
+            <div class="chatbot-content">
+                <div>${content}</div>
+                <div class="chatbot-time">${timestamp}</div>
+            </div>
+        `;
+        
+        this.messagesContainer.appendChild(messageDiv);
+    }
+    
+    setLoading(loading) {
+        this.sendButton.disabled = loading;
+        this.inputField.disabled = loading;
+        
+        if (loading) {
+            this.addMessage('...', 'bot');
+        } else {
+            // Remover último mensaje si es "..."
+            const lastMessage = this.messagesContainer.lastElementChild;
+            if (lastMessage && lastMessage.textContent.includes('...')) {
+                lastMessage.remove();
+            }
+        }
+    }
+    
+    scrollToBottom() {
+        setTimeout(() => {
+            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        }, 100);
+    }
+    
+    async checkIAStatus() {
+        try {
+            const response = await fetch('/chatbot/api/estado/');
+            const data = await response.json();
+            
+            const statusElement = document.getElementById('chatbot-status');
+            
+            if (data.disponible) {
+                statusElement.textContent = 'IA Conectada';
+                statusElement.style.color = '#28a745';
+            } else {
+                statusElement.textContent = 'IA Desconectada';
+                statusElement.style.color = '#dc3545';
+            }
+        } catch (error) {
+            console.warn('No se pudo verificar estado de IA:', error);
+        }
+    }
+    
+    getCsrfToken() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfToken ? csrfToken.value : '';
+    }
+}
+
+// Inicializar widget cuando cargue la página
+document.addEventListener('DOMContentLoaded', function() {
+    new ChatbotWidget();
+});
+</script>

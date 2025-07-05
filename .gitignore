@@ -1,0 +1,51 @@
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv/
+
+# Base de datos
+*.sqlite3
+db.sqlite3
+
+# Archivos Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Variables de entorno
+.env
+.env.local
+
+# Logs
+*.log
+chatbot.log
+
+# Logs y archivos del chatbot IA
+applications/chatbot/logs/
+groq_config.txt
+api_keys.txt
+
+# Media files
+media/
+
+# Static files (solo en producción)
+staticfiles/
+
+# Cache
+.cache/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Migraciones específicas (opcional)
+# */migrations/0*.py

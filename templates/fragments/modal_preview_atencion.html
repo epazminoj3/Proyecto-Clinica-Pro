@@ -1,0 +1,176 @@
+<!-- Modal para previsualizar atención -->
+<div id="modal-preview-atencion" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto m-4">
+        <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
+                    Previsualización de Atención Médica
+                </h2>
+                <button id="close-modal-preview" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-8 space-y-8">
+            <!-- Identificación del Paciente -->
+            <div class="bg-blue-50 rounded-2xl p-6 border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold text-blue-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Identificación del Paciente
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <h4 class="font-semibold text-gray-800 mb-2">Paciente:</h4>
+                            <p id="preview-paciente-nombre" class="text-lg text-gray-700">--</p>
+                            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+                                <span><strong>Cédula:</strong> <span id="preview-paciente-cedula">--</span></span>
+                                <span><strong>Edad:</strong> <span id="preview-paciente-edad">--</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div class="w-24 h-24 bg-gray-200 rounded-full overflow-hidden">
+                            <img id="preview-paciente-foto" src="/static/img/usuario_anonimo.png" alt="Foto del paciente" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signos Vitales -->
+            <div class="bg-red-50 rounded-2xl p-6 border-l-4 border-red-500">
+                <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                    Signos Vitales
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Presión Arterial</h4>
+                        <p id="preview-presion" class="text-lg font-bold text-red-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Pulso</h4>
+                        <p id="preview-pulso" class="text-lg font-bold text-pink-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Temperatura</h4>
+                        <p id="preview-temperatura" class="text-lg font-bold text-orange-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Freq. Respiratoria</h4>
+                        <p id="preview-frecuencia" class="text-lg font-bold text-blue-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Saturación O2</h4>
+                        <p id="preview-saturacion" class="text-lg font-bold text-green-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Peso</h4>
+                        <p id="preview-peso" class="text-lg font-bold text-purple-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Altura</h4>
+                        <p id="preview-altura" class="text-lg font-bold text-indigo-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <h4 class="font-semibold text-gray-800 text-sm">Consulta Control</h4>
+                        <p id="preview-control" class="text-lg font-bold text-teal-700">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación Clínica -->
+            <div class="bg-green-50 rounded-2xl p-6 border-l-4 border-green-500">
+                <h3 class="text-xl font-bold text-green-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Evaluación Clínica
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Motivo de Consulta:</h4>
+                        <p id="preview-motivo" class="text-gray-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Síntomas:</h4>
+                        <p id="preview-sintomas" class="text-gray-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Examen Físico:</h4>
+                        <p id="preview-examen" class="text-gray-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Diagnósticos:</h4>
+                        <div id="preview-diagnosticos" class="text-gray-700">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plan de Tratamiento -->
+            <div class="bg-yellow-50 rounded-2xl p-6 border-l-4 border-yellow-500">
+                <h3 class="text-xl font-bold text-yellow-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    Plan de Tratamiento
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Tratamiento:</h4>
+                        <p id="preview-tratamiento" class="text-gray-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 class="font-semibold text-gray-800 mb-2">Exámenes Enviados:</h4>
+                        <p id="preview-examenes" class="text-gray-700">--</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm md:col-span-2">
+                        <h4 class="font-semibold text-gray-800 mb-2">Comentarios Adicionales:</h4>
+                        <p id="preview-comentarios" class="text-gray-700">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medicamentos Prescritos -->
+            <div class="bg-purple-50 rounded-2xl p-6 border-l-4 border-purple-500">
+                <h3 class="text-xl font-bold text-purple-800 mb-4 flex items-center">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"></path>
+                    </svg>
+                    Medicamentos Prescritos (<span id="preview-medicamentos-count">0</span>)
+                </h3>
+                <div id="preview-medicamentos-lista" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="p-4 text-center text-gray-500">
+                        No hay medicamentos prescritos
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex justify-center space-x-4 pt-4 border-t border-gray-200">
+                <button id="confirm-save-atencion" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span>Confirmar y Guardar</span>
+                </button>
+                <button id="cancel-preview" class="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                    Continuar Editando
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

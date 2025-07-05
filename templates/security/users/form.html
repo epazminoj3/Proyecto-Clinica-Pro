@@ -1,0 +1,1594 @@
+{% extends 'home.html' %} 
+<title>{% block title %}{{title}}{% endblock %}</title>
+{% load static %}
+{% block content %}
+<section class="dark:bg-principal">
+    <div class="text-center" data-aos="fade" data-aos-delay="200">
+        <div class="sm:pt-28 lg:pt-4">
+             <h1 class="rounded-2xl  bg-indigo-500 px-2 py-1 text-white uppercase text-4xl">
+                {{ title1 }}
+             </h1>
+        </div>
+
+        <!-- Mensajes de error del formulario (no específicos de campo) -->
+        {% if form.non_field_errors %}
+        <div class="mx-4 lg:mx-20 mb-6" data-aos="fade-up">
+            <div class="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-lg max-w-4xl mx-auto">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-exclamation-triangle text-red-500 text-lg"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-red-800 dark:text-red-200 font-medium">
+                            Se encontraron errores en el formulario:
+                        </h3>
+                        <div class="mt-2 text-red-700 dark:text-red-300">
+                            <ul class="list-disc list-inside space-y-1">
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6 py-4">
+            <div class="mx-4 lg:mx-20" data-aos="fade">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <!-- Formulario -->
+                    <div class="lg:col-span-8 form-container">
+                        <!-- Contenedor principal del formulario -->
+                        <div class="bg-white dark:bg-secundario rounded-3xl p-8 pb-24"
+                            data-aos="fade-up" data-aos-delay="200">
+                            {% csrf_token %}
+                            
+                            {% if not object %}
+                            <!-- Mensaje para nuevo usuario -->
+                            <div class="form-section">
+                                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fa-solid fa-info-circle text-blue-500 text-lg"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-blue-800 dark:text-blue-200 font-medium">
+                                                Añadir Usuario
+                                            </h3>
+                                            <p class="mt-1 text-blue-700 dark:text-blue-300 text-sm">
+                                                Después de crear el usuario, podrás editar más opciones del usuario.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Información Básica del Usuario -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-user text-blue-500"></i> 
+                                    {% if object %}Información del Usuario{% else %}Información Básica{% endif %}
+                                </h3>
+                    
+                                <div class="grid grid-cols-1 gap-6">
+                                    <!-- Campo Username -->
+                                    <div class="form-group">
+                                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                                            {{ form.username.label }}
+                                            {% if form.username.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.username }}
+                                        <div class="validation-message info">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            Requerido. 150 caracteres como máximo. Únicamente letras, dígitos y @/./+/-/_
+                                        </div>
+                                        {% if form.username.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.username.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if object %}
+                            <!-- Contraseña (solo para edición) -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-key text-orange-500"></i> Contraseña</h3>
+                                
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                <strong>algoritmo:</strong> pbkdf2_sha256 <strong>iteraciones:</strong> 1000000 
+                                                <strong>salto:</strong> {{ object.password|slice:":20" }}*** 
+                                                <strong>función resumen:</strong> ***
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                                Las contraseñas en texto plano no se almacenan, por lo que no se puede ver la contraseña del usuario.
+                                            </p>
+                                        </div>
+                                        <a href="#" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium">
+                                            <i class="fa-solid fa-refresh mr-1"></i>Restablecer contraseña
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Información Personal (solo para edición) -->
+                            {% if object %}
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-id-card text-green-500"></i> Información Personal</h3>
+                    
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Campo First Name -->
+                                    <div class="form-group">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                            Nombre
+                                        </label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.first_name.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo Last Name -->
+                                    <div class="form-group">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                            Apellidos
+                                        </label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.last_name.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Campo Email -->
+                                    <div class="form-group md:col-span-2">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                                            Email
+                                        </label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.email.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if object %}
+                            <!-- Permisos de Usuario -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-user-shield text-purple-500"></i> Permisos de Usuario</h3>
+                                
+                                <div class="form-group">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <label class="form-label">
+                                                Permisos específicos para este usuario
+                                            </label>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                Los permisos específicos para este usuario. El usuario tendrá todos los permisos aquí especificados además de los de sus grupos.
+                                            </p>
+                                        </div>
+                                        
+                                        <!-- Botones de control -->
+                                        <div class="flex gap-2">
+                                            <button type="button" id="selectAllPermissions" 
+                                                class="text-xs bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 px-3 py-1 rounded-full transition-colors">
+                                                <i class="fa-solid fa-check-double mr-1"></i>Todos
+                                            </button>
+                                            <button type="button" id="deselectAllPermissions" 
+                                                class="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 px-3 py-1 rounded-full transition-colors">
+                                                <i class="fa-solid fa-xmark mr-1"></i>Ninguno
+                                            </button>
+                                            <button type="button" id="toggleAllPermissions" 
+                                                class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 px-3 py-1 rounded-full transition-colors">
+                                                <i class="fa-solid fa-eye mr-1"></i>Ver todos
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Grid de permisos -->
+                                    <div class="permissions-grid" id="permissionsGrid" style="display: none;">
+                                        {{ form.user_permissions }}</div>
+                                    
+                                    <!-- Mensaje cuando está colapsado -->
+                                    <div class="permissions-summary bg-gray-50 dark:bg-gray-800 p-4 rounded-lg" id="permissionsSummary">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                    <strong>Permisos asignados:</strong> <span id="selectedPermissionsCount">0</span> de <span id="totalPermissionsCount">0</span>
+                                                </p>
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    Haga clic en "Ver todos" para gestionar los permisos específicos
+                                                </p>
+                                            </div>
+                                            <i class="fa-solid fa-chevron-down text-gray-400" id="permissionsToggleIcon"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if form.user_permissions.errors %}
+                                    <div class="validation-message error">
+                                        {% for error in form.user_permissions.errors %}
+                                        <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if object %}
+                            <!-- Permisos (solo para edición) -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-shield-alt text-indigo-500"></i> Permisos</h3>
+                    
+                                <div class="space-y-4">
+                                    <div class="checkbox-group">
+                                        {{ form.is_active }}
+                                        <label for="{{ form.is_active.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <strong>Activo</strong>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                Indica si el usuario debe ser tratado como activo. Desmarque esta opción en lugar de borrar la cuenta.
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {% if form.is_staff %}
+                                    <div class="checkbox-group">
+                                        {{ form.is_staff }}
+                                        <label for="{{ form.is_staff.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <strong>Es staff</strong>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                Indica si el usuario puede entrar en este sitio de administración.
+                                            </div>
+                                        </label>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if form.is_superuser %}
+                                    <div class="checkbox-group">
+                                        {{ form.is_superuser }}
+                                        <label for="{{ form.is_superuser.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <strong>Estado de superusuario</strong>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                Indica que este usuario tiene todos los permisos sin asignárselos explícitamente.
+                                            </div>
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if object %}
+                            <!-- Grupos (solo para edición) -->
+                            {% if form.groups %}
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-users text-yellow-500"></i> Grupos</h3>
+                    
+                                <div class="form-group">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div>
+                                            <label class="form-label">
+                                                {{ form.groups.label }}
+                                                {% if form.groups.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                            </label>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                Los grupos a los que pertenece este usuario. Un usuario tendrá todos los permisos asignados a cada uno de sus grupos.
+                                            </p>
+                                        </div>
+                                        
+                                        <!-- Botones de seleccionar todo/ninguno -->
+                                        <div class="flex gap-2">
+                                            <button type="button" id="selectAllGroups" 
+                                                class="text-xs bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 px-3 py-1 rounded-full transition-colors">
+                                                <i class="fa-solid fa-check-double mr-1"></i>Todos
+                                            </button>
+                                            <button type="button" id="deselectAllGroups" 
+                                                class="text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 px-3 py-1 rounded-full transition-colors">
+                                                <i class="fa-solid fa-xmark mr-1"></i>Ninguno
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="groups-grid">
+                                        {% for choice in form.groups %}
+                                        <div class="checkbox-group">
+                                            {{ choice.tag }}
+                                            <label for="{{ choice.id_for_label }}" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {{ choice.choice_label }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if form.groups.errors %}
+                                    <div class="validation-message error">
+                                        {% for error in form.groups.errors %}
+                                        <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Fechas Importantes (solo para edición) -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-calendar text-purple-500"></i> Fechas importantes</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                        <label class="form-label">Último inicio de sesión:</label>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {% if object.last_login %}
+                                                Fecha: {{ object.last_login|date:"d/m/Y" }} | 
+                                                Hora: {{ object.last_login|time:"H:i:s" }}
+                                            {% else %}
+                                                Nunca
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                        <label class="form-label">Fecha de alta:</label>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Fecha: {{ object.date_joined|date:"d/m/Y" }} | 
+                                            Hora: {{ object.date_joined|time:"H:i:s" }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información Adicional (solo para edición) -->
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-address-card text-teal-500"></i> Información adicional</h3>
+                    
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {% if form.dni %}
+                                    <!-- Campo DNI -->
+                                    <div class="form-group">
+                                        <label for="{{ form.dni.id_for_label }}" class="form-label">
+                                            Cédula o RUC
+                                        </label>
+                                        {{ form.dni }}
+                                        {% if form.dni.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.dni.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if form.phone %}
+                                    <!-- Campo Phone -->
+                                    <div class="form-group">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                            Teléfono
+                                        </label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.phone.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if form.image %}
+                                    <!-- Campo Image -->
+                                    <div class="form-group md:col-span-2">
+                                        <label for="{{ form.image.id_for_label }}" class="form-label">
+                                            Imagen de perfil
+                                        </label>
+                                        {% if object.image %}
+                                            <div class="mb-2 text-sm text-gray-600 dark:text-gray-400">
+                                                <strong>Actualmente:</strong> 
+                                                <a href="{{ object.image.url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                                    {{ object.image.name }}
+                                                </a>
+                                                <button type="button" class="ml-2 text-red-600 hover:text-red-800 text-xs">
+                                                    Limpiar
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                        {{ form.image }}
+                                        <div class="validation-message info">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 2MB
+                                        </div>
+                                        {% if form.image.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.image.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+
+                                    {% if form.direction %}
+                                    <!-- Campo Direction -->
+                                    <div class="form-group md:col-span-2">
+                                        <label for="{{ form.direction.id_for_label }}" class="form-label">
+                                            Dirección
+                                        </label>
+                                        {{ form.direction }}
+                                        {% if form.direction.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.direction.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Autenticación -->
+                            {% if form.password1 %}
+                            <div class="form-section">
+                                <h3><i class="fa-solid fa-lock text-red-500"></i> Autenticación basada en contraseña</h3>
+                                
+                                <div class="form-group">
+                                    <div class="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 p-4 rounded-lg mb-4">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0">
+                                                <i class="fa-solid fa-exclamation-triangle text-yellow-500 text-sm"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                                                    <strong>Habilitado:</strong> Determina si el usuario podrá autenticarse usando una contraseña. Si está deshabilitado, el usuario aún podría autenticarse mediante otros métodos, como Single Sign-On o LDAP.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Checkbox Habilitado para autenticación -->
+                                    <div class="checkbox-group mb-4">
+                                        <input type="checkbox" id="password_enabled" name="password_enabled" class="form-checkbox" checked>
+                                        <label for="password_enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <strong>Habilitado</strong>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                Permite al usuario autenticarse con contraseña
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                    
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                            {{ form.password1.label }}
+                                            {% if form.password1.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.password1 }}
+                                        <div class="validation-message info">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            <div>
+                                                <div>• Su contraseña no puede asemejarse tanto a su otra información personal.</div>
+                                                <div>• Su contraseña debe contener al menos 8 caracteres.</div>
+                                                <div>• Su contraseña no puede ser una clave utilizada comúnmente.</div>
+                                                <div>• Su contraseña no puede ser completamente numérica.</div>
+                                            </div>
+                                        </div>
+                                        {% if form.password1.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.password1.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                            {{ form.password2.label }}
+                                            {% if form.password2.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                        </label>
+                                        {{ form.password2 }}
+                                        <div class="validation-message info">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                            Para verificar, introduzca la misma contraseña anterior.
+                                        </div>
+                                        {% if form.password2.errors %}
+                                        <div class="validation-message error">
+                                            {% for error in form.password2.errors %}
+                                            <span><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Botones de acción -->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-save"></i>
+                                    {% if object %}Actualizar{% else %}Crear{% endif %} Usuario
+                                </button>
+                                <a href="{% url 'security:user_list' %}" class="btn btn-secondary">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vista Previa -->
+                    <div class="lg:col-span-4 preview-container">
+                        <div class="preview-card" id="previewCard">
+                            <div class="preview-avatar" id="previewAvatar">
+                                {% if object and object.image %}
+                                    <img src="{{ object.image.url }}" alt="Avatar" />
+                                {% else %}
+                                    <i class="fa-solid fa-user" id="previewIcon"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="preview-name" id="previewName">
+                                {% if object %}
+                                    {{ object.get_full_name|default:object.username }}
+                                {% else %}
+                                    Nuevo Usuario
+                                {% endif %}
+                            </div>
+                            
+                            {% if object %}
+                            <div class="preview-email" id="previewEmail">
+                                {{ object.email|default:"sin-email@ejemplo.com" }}
+                            </div>
+                            
+                            <div class="preview-details">
+                                <div class="preview-detail-item">
+                                    <i class="fa-solid fa-user preview-detail-icon"></i>
+                                    <span>Usuario: <span id="previewUsername">{{ object.username }}</span></span>
+                                </div>
+                                
+                                {% if object.dni %}
+                                <div class="preview-detail-item" id="previewDniContainer">
+                                    <i class="fa-solid fa-id-card preview-detail-icon"></i>
+                                    <span>DNI: <span id="previewDni">{{ object.dni }}</span></span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if object.phone %}
+                                <div class="preview-detail-item" id="previewPhoneContainer">
+                                    <i class="fa-solid fa-phone preview-detail-icon"></i>
+                                    <span>Teléfono: <span id="previewPhone">{{ object.phone }}</span></span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if object.direction %}
+                                <div class="preview-detail-item" id="previewDirectionContainer">
+                                    <i class="fa-solid fa-map-marker-alt preview-detail-icon"></i>
+                                    <span>Dirección: <span id="previewDirection">{{ object.direction }}</span></span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="preview-groups" id="previewGroupsContainer">
+                                <div class="text-sm font-medium mb-2">Grupos asignados:</div>
+                                <div id="previewGroupsList">
+                                    {% for group in object.groups.all %}
+                                        <span class="preview-group-tag">{{ group.name }}</span>
+                                    {% empty %}
+                                        <span class="preview-group-tag">Sin grupos</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="preview-status" id="previewStatus">
+                                <i class="fa-solid fa-circle mr-1"></i>
+                                {% if object.is_active %}Usuario Activo{% else %}Usuario Inactivo{% endif %}
+                            </div>
+                            {% else %}
+                            <!-- Vista previa simplificada para crear usuario -->
+                            <div class="preview-simple">
+                                <div class="text-center text-white/80 text-sm">
+                                    <i class="fa-solid fa-info-circle mb-2 text-2xl"></i>
+                                    <p>Complete el formulario para ver la vista previa</p>
+                                    <p class="text-xs mt-2">El usuario tendrá acceso básico después de la creación</p>
+                                </div>
+                                <div class="preview-username-simple" id="previewUsernameSimple">
+                                    <i class="fa-solid fa-user mr-2"></i>
+                                    <span id="previewUsernameText">usuario</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    /* Form Styles */
+    .form-container {
+        padding-bottom: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .form-section h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dark .form-section h3 {
+        color: #f3f4f6;
+    }
+
+    .form-section h3 i {
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    .dark .form-label {
+        color: #d1d5db;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .form-input, .dark .form-textarea {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error, .form-textarea.error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    .dark .form-input.error, .dark .form-textarea.error {
+        border-color: #ef4444;
+        background-color: #7f1d1d;
+    }
+
+    .form-input.success, .form-textarea.success {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
+
+    .dark .form-input.success, .dark .form-textarea.success {
+        border-color: #10b981;
+        background-color: #064e3b;
+    }
+
+    .form-file-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        background-color: #f8fafc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .form-file-input {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-file-input:hover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+        transform: translateY(-1px);
+    }
+
+    .dark .form-file-input:hover {
+        border-color: #3b82f6;
+        background-color: #1e3a8a;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .checkbox-group:hover {
+        background-color: #f3f4f6;
+    }
+
+    .dark .checkbox-group:hover {
+        background-color: #374151;
+    }
+
+    .form-checkbox {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 0.25rem;
+        border: 2px solid #d1d5db;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background-color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .dark .form-checkbox {
+        border-color: #4b5563;
+        background-color: #374151;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-checkbox:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-checkbox:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .groups-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.5rem;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+    }
+
+    .dark .groups-grid {
+        background-color: #374151;
+        border-color: #4b5563;
+    }
+
+    .permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+        margin-top: 1rem;
+    }
+
+    .dark .permissions-grid {
+        background-color: #374151;
+        border-color: #4b5563;
+    }
+
+    .permission-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+        transition: all 0.2s ease;
+    }
+
+    .dark .permission-item {
+        border-color: #4b5563;
+        background-color: #374151;
+    }
+
+    .permission-item:hover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+    }
+
+    .dark .permission-item:hover {
+        border-color: #3b82f6;
+        background-color: #1e3a8a;
+    }
+
+    .permissions-summary {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .permissions-summary:hover {
+        background-color: #e5e7eb;
+    }
+
+    .dark .permissions-summary:hover {
+        background-color: #4b5563;
+    }
+
+    .validation-message {
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .validation-message.error {
+        color: #dc2626;
+    }
+
+    .validation-message.success {
+        color: #059669;
+    }
+
+    .validation-message.info {
+        color: #0284c7;
+    }
+
+    .form-actions {
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        margin: 2rem -2rem -2rem -2rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        border-radius: 0 0 1.5rem 1.5rem;
+    }
+
+    .dark .form-actions {
+        background: #374151;
+        border-top-color: #4b5563;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background-color: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4b5563;
+        transform: translateY(-1px);
+    }
+
+    /* Preview Styles */
+    .preview-container {
+        position: sticky;
+        top: 2rem;
+        height: fit-content;
+    }
+
+    .preview-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        color: white;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .preview-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2.5rem;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .preview-avatar.has-image {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .preview-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .preview-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-email {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-details {
+        text-align: left;
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .preview-detail-icon {
+        margin-right: 0.75rem;
+        width: 1rem;
+        opacity: 0.9;
+    }
+
+    .preview-groups {
+        margin-bottom: 1.5rem;
+    }
+
+    .preview-groups .text-sm {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-align: left;
+    }
+
+    #previewGroupsList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .preview-group-tag {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .preview-status {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .preview-status.status-active {
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .preview-status.status-inactive {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .preview-simple {
+        padding: 2rem 0;
+        text-align: center;
+    }
+
+    .preview-username-simple {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .preview-container {
+            position: static;
+            order: -1;
+            margin-bottom: 2rem;
+        }
+        
+        .form-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: 0;
+            border-radius: 0;
+            z-index: 50;
+            padding: 1rem;
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            padding-bottom: 6rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .form-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos del DOM
+    const form = document.querySelector('form');
+    const previewCard = document.getElementById('previewCard');
+    const previewAvatar = document.getElementById('previewAvatar');
+    const previewName = document.getElementById('previewName');
+    const previewEmail = document.getElementById('previewEmail');
+    const previewUsername = document.getElementById('previewUsername');
+    const previewUsernameText = document.getElementById('previewUsernameText');
+    const previewDni = document.getElementById('previewDni');
+    const previewPhone = document.getElementById('previewPhone');
+    const previewDirection = document.getElementById('previewDirection');
+    const previewDniContainer = document.getElementById('previewDniContainer');
+    const previewPhoneContainer = document.getElementById('previewPhoneContainer');
+    const previewDirectionContainer = document.getElementById('previewDirectionContainer');
+    const previewStatus = document.getElementById('previewStatus');
+    const previewGroupsList = document.getElementById('previewGroupsList');
+
+    // Referencias a campos del formulario
+    const usernameField = document.getElementById('id_username');
+    const emailField = document.getElementById('id_email');
+    const firstNameField = document.getElementById('id_first_name');
+    const lastNameField = document.getElementById('id_last_name');
+    const dniField = document.getElementById('id_dni');
+    const phoneField = document.getElementById('id_phone');
+    const directionField = document.getElementById('id_direction');
+    const imageField = document.getElementById('id_image');
+    const isActiveField = document.getElementById('id_is_active');
+    const groupCheckboxes = document.querySelectorAll('input[name="groups"]');
+    const passwordEnabledField = document.getElementById('password_enabled');
+    const password1Field = document.getElementById('id_password1');
+    const password2Field = document.getElementById('id_password2');
+
+    // Check if we're creating or editing
+    const isEditing = {{ object|yesno:'true,false' }};
+
+    // Botones de selección de grupos
+    const selectAllGroupsBtn = document.getElementById('selectAllGroups');
+    const deselectAllGroupsBtn = document.getElementById('deselectAllGroups');
+    
+    // Botones de selección de permisos
+    const selectAllPermissionsBtn = document.getElementById('selectAllPermissions');
+    const deselectAllPermissionsBtn = document.getElementById('deselectAllPermissions');
+    const toggleAllPermissionsBtn = document.getElementById('toggleAllPermissions');
+    const permissionsGrid = document.getElementById('permissionsGrid');
+    const permissionsSummary = document.getElementById('permissionsSummary');
+    const permissionsToggleIcon = document.getElementById('permissionsToggleIcon');
+    const selectedPermissionsCount = document.getElementById('selectedPermissionsCount');
+    const totalPermissionsCount = document.getElementById('totalPermissionsCount');
+    const permissionCheckboxes = document.querySelectorAll('input[name="user_permissions"]');
+
+    // Funciones de selección de grupos
+    if (selectAllGroupsBtn) {
+        selectAllGroupsBtn.addEventListener('click', function() {
+            groupCheckboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updatePreview();
+        });
+    }
+
+    if (deselectAllGroupsBtn) {
+        deselectAllGroupsBtn.addEventListener('click', function() {
+            groupCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updatePreview();
+        });
+    }
+
+    // Funciones de selección de permisos
+    if (selectAllPermissionsBtn && permissionCheckboxes.length > 0) {
+        selectAllPermissionsBtn.addEventListener('click', function() {
+            permissionCheckboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updatePermissionsCount();
+        });
+    }
+
+    if (deselectAllPermissionsBtn && permissionCheckboxes.length > 0) {
+        deselectAllPermissionsBtn.addEventListener('click', function() {
+            permissionCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updatePermissionsCount();
+        });
+    }
+
+    if (toggleAllPermissionsBtn && permissionsGrid && permissionsSummary) {
+        let isExpanded = false;
+        
+        function togglePermissions() {
+            isExpanded = !isExpanded;
+            
+            if (isExpanded) {
+                permissionsGrid.style.display = 'grid';
+                permissionsSummary.style.display = 'none';
+                toggleAllPermissionsBtn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i>Ocultar';
+                if (permissionsToggleIcon) {
+                    permissionsToggleIcon.classList.remove('fa-chevron-down');
+                    permissionsToggleIcon.classList.add('fa-chevron-up');
+                }
+            } else {
+                permissionsGrid.style.display = 'none';
+                permissionsSummary.style.display = 'block';
+                toggleAllPermissionsBtn.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Ver todos';
+                if (permissionsToggleIcon) {
+                    permissionsToggleIcon.classList.remove('fa-chevron-up');
+                    permissionsToggleIcon.classList.add('fa-chevron-down');
+                }
+            }
+        }
+        
+        toggleAllPermissionsBtn.addEventListener('click', togglePermissions);
+        if (permissionsSummary) {
+            permissionsSummary.addEventListener('click', togglePermissions);
+        }
+    }
+
+    // Función para actualizar contador de permisos
+    function updatePermissionsCount() {
+        if (selectedPermissionsCount && totalPermissionsCount && permissionCheckboxes.length > 0) {
+            const selected = Array.from(permissionCheckboxes).filter(cb => cb.checked).length;
+            const total = permissionCheckboxes.length;
+            
+            selectedPermissionsCount.textContent = selected;
+            totalPermissionsCount.textContent = total;
+        }
+    }
+
+    // Event listeners para checkboxes de permisos
+    if (permissionCheckboxes.length > 0) {
+        permissionCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updatePermissionsCount);
+        });
+        updatePermissionsCount(); // Inicializar contador
+    }
+
+    // Funcionalidad para habilitar/deshabilitar campos de contraseña
+    if (passwordEnabledField && password1Field && password2Field) {
+        function togglePasswordFields() {
+            const isEnabled = passwordEnabledField.checked;
+            password1Field.disabled = !isEnabled;
+            password2Field.disabled = !isEnabled;
+            password1Field.required = isEnabled;
+            password2Field.required = isEnabled;
+            
+            // Cambiar estilos visuales
+            const passwordContainer = password1Field.closest('.grid');
+            if (passwordContainer) {
+                passwordContainer.style.opacity = isEnabled ? '1' : '0.5';
+                passwordContainer.style.pointerEvents = isEnabled ? 'auto' : 'none';
+            }
+        }
+
+        passwordEnabledField.addEventListener('change', togglePasswordFields);
+        togglePasswordFields(); // Inicializar estado
+    }
+
+    // Validadores
+    const validators = {
+        username: (value) => {
+            if (!value || value.trim().length < 3) {
+                return { valid: false, message: 'El nombre de usuario debe tener al menos 3 caracteres' };
+            }
+            if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                return { valid: false, message: 'Solo se permiten letras, números y guiones bajos' };
+            }
+            return { valid: true, message: 'Nombre de usuario válido' };
+        },
+        email: (value) => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!value || !emailRegex.test(value)) {
+                return { valid: false, message: 'Ingrese un correo electrónico válido' };
+            }
+            return { valid: true, message: 'Correo electrónico válido' };
+        },
+        first_name: (value) => {
+            if (!value || value.trim().length < 2) {
+                return { valid: false, message: 'El nombre debe tener al menos 2 caracteres' };
+            }
+            return { valid: true, message: 'Nombre válido' };
+        },
+        last_name: (value) => {
+            if (!value || value.trim().length < 2) {
+                return { valid: false, message: 'El apellido debe tener al menos 2 caracteres' };
+            }
+            return { valid: true, message: 'Apellido válido' };
+        },
+        dni: (value) => {
+            if (value && (!/^\d+$/.test(value) || value.length < 8)) {
+                return { valid: false, message: 'El DNI debe contener al menos 8 dígitos' };
+            }
+            return { valid: true, message: value ? 'DNI válido' : 'DNI opcional' };
+        },
+        phone: (value) => {
+            if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
+                return { valid: false, message: 'Formato de teléfono inválido' };
+            }
+            return { valid: true, message: value ? 'Teléfono válido' : 'Teléfono opcional' };
+        }
+    };
+
+    // Función para mostrar validación
+    function showValidation(fieldName, validation) {
+        const field = document.getElementById('id_' + fieldName);
+        const existingMessage = field.parentElement.querySelector('.validation-message');
+        
+        // Remover mensaje existente
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        // Actualizar clases del campo
+        field.classList.remove('error', 'success');
+        if (validation.valid) {
+            field.classList.add('success');
+        } else {
+            field.classList.add('error');
+        }
+
+        // Agregar nuevo mensaje
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `validation-message ${validation.valid ? 'success' : 'error'}`;
+        messageDiv.innerHTML = `
+            <i class="fas fa-${validation.valid ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${validation.message}</span>
+        `;
+        field.parentElement.appendChild(messageDiv);
+    }
+
+    // Función para actualizar vista previa
+    function updatePreview() {
+        if (!isEditing) {
+            // Vista previa simplificada para crear usuario
+            if (usernameField && previewUsernameText) {
+                previewUsernameText.textContent = usernameField.value.trim() || 'usuario';
+            }
+            return;
+        }
+
+        // Vista previa completa para editar usuario
+        // Nombre completo
+        const firstName = firstNameField ? firstNameField.value.trim() : '';
+        const lastName = lastNameField ? lastNameField.value.trim() : '';
+        const fullName = firstName || lastName ? `${firstName} ${lastName}`.trim() : 'Usuario';
+        if (previewName) previewName.textContent = fullName;
+
+        // Email
+        if (emailField && previewEmail) {
+            previewEmail.textContent = emailField.value.trim() || 'sin-email@ejemplo.com';
+        }
+
+        // Username
+        if (usernameField && previewUsername) {
+            previewUsername.textContent = usernameField.value.trim() || 'usuario';
+        }
+
+        // DNI
+        if (dniField && previewDni && previewDniContainer) {
+            const dni = dniField.value.trim();
+            if (dni) {
+                previewDni.textContent = dni;
+                previewDniContainer.style.display = 'flex';
+            } else {
+                previewDniContainer.style.display = 'none';
+            }
+        }
+
+        // Teléfono
+        if (phoneField && previewPhone && previewPhoneContainer) {
+            const phone = phoneField.value.trim();
+            if (phone) {
+                previewPhone.textContent = phone;
+                previewPhoneContainer.style.display = 'flex';
+            } else {
+                previewPhoneContainer.style.display = 'none';
+            }
+        }
+
+        // Dirección
+        if (directionField && previewDirection && previewDirectionContainer) {
+            const direction = directionField.value.trim();
+            if (direction) {
+                previewDirection.textContent = direction;
+                previewDirectionContainer.style.display = 'flex';
+            } else {
+                previewDirectionContainer.style.display = 'none';
+            }
+        }
+
+        // Estado activo
+        if (isActiveField && previewStatus) {
+            const isActive = isActiveField.checked;
+            previewStatus.className = `preview-status ${isActive ? 'status-active' : 'status-inactive'}`;
+            previewStatus.innerHTML = `
+                <i class="fas fa-circle"></i>
+                <span>${isActive ? 'Usuario Activo' : 'Usuario Inactivo'}</span>
+            `;
+        }
+
+        // Grupos
+        if (groupCheckboxes.length > 0 && previewGroupsList) {
+            const selectedGroups = Array.from(groupCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.parentElement.querySelector('label').textContent.trim());
+            
+            previewGroupsList.innerHTML = '';
+            if (selectedGroups.length > 0) {
+                selectedGroups.forEach(group => {
+                    const tag = document.createElement('span');
+                    tag.className = 'preview-group-tag';
+                    tag.textContent = group;
+                    previewGroupsList.appendChild(tag);
+                });
+            } else {
+                const tag = document.createElement('span');
+                tag.className = 'preview-group-tag';
+                tag.style.opacity = '0.6';
+                tag.textContent = 'Sin grupos asignados';
+                previewGroupsList.appendChild(tag);
+            }
+        }
+
+        // Animación de actualización
+        previewCard.classList.add('animate-pulse');
+        setTimeout(() => {
+            previewCard.classList.remove('animate-pulse');
+        }, 300);
+    }
+
+    // Función para manejar vista previa de imagen
+    function handleImagePreview() {
+        if (imageField) {
+            // Inicializar avatar si ya existe una imagen
+            const existingImage = '{% if object.image %}{{ object.image.url }}{% endif %}';
+            if (existingImage) {
+                const img = document.createElement('img');
+                img.src = existingImage;
+                img.alt = 'Avatar';
+                img.style.width = '100px';
+                img.style.height = '100px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                previewAvatar.innerHTML = '';
+                previewAvatar.appendChild(img);
+                previewAvatar.classList.add('has-image');
+            }
+            
+            imageField.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validar tipo de archivo
+                    if (!file.type.startsWith('image/')) {
+                        showValidation('image', { valid: false, message: 'Solo se permiten archivos de imagen' });
+                        return;
+                    }
+                    
+                    // Validar tamaño (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        showValidation('image', { valid: false, message: 'El archivo es demasiado grande. Máximo 2MB' });
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Avatar';
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '50%';
+                        img.style.maxWidth = '100px';
+                        img.style.maxHeight = '100px';
+                        
+                        previewAvatar.innerHTML = '';
+                        previewAvatar.appendChild(img);
+                        previewAvatar.classList.add('has-image', 'fade-in');
+                        
+                        const imagePreview = document.getElementById('imagePreview');
+                        if (imagePreview) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.classList.add('visible');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    showValidation('image', { valid: true, message: 'Imagen cargada correctamente' });
+                } else {
+                    // Restaurar ícono por defecto
+                    previewAvatar.innerHTML = '<i class="fas fa-user-circle"></i>';
+                    previewAvatar.classList.remove('has-image');
+                }
+            });
+        }
+    }
+
+    // Agregar clases CSS a todos los campos del formulario
+    document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], textarea, select').forEach(field => {
+        if (field.type === 'file') {
+            field.classList.add('form-file-input');
+        } else if (field.type === 'checkbox') {
+            field.classList.add('form-checkbox');
+        } else {
+            field.classList.add('form-input');
+        }
+    });
+    
+    // Agregar clases específicas para textarea
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.classList.add('form-textarea');
+    });
+
+    // Inicializar
+    handleImagePreview();
+    updatePreview();
+
+    // Validación del formulario antes de enviar
+    form.addEventListener('submit', function(e) {
+        let hasErrors = false;
+        
+        fieldsToValidate.forEach(fieldName => {
+            const field = document.getElementById('id_' + fieldName);
+            if (field && validators[fieldName]) {
+                const validation = validators[fieldName](field.value);
+                showValidation(fieldName, validation);
+                if (!validation.valid && field.hasAttribute('required')) {
+                    hasErrors = true;
+                }
+            }
+        });
+
+        if (hasErrors) {
+            e.preventDefault();
+            // Scroll al primer error
+            const firstError = document.querySelector('.form-input.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+
+    // Animación inicial
+    setTimeout(() => {
+        previewCard.style.opacity = '1';
+        previewCard.style.transform = 'translateY(0)';
+    }, 100);
+});
+</script>
+{% endblock %}
