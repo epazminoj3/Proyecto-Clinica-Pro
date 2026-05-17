@@ -1,10 +1,13 @@
-
 from django.shortcuts import redirect, render
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django .contrib.auth.models import User
+from django import forms
+from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+
+class EmailAuthenticationForm(forms.Form):
+    email = forms.EmailField(label="Correo electrónico", widget=forms.EmailInput(attrs={'autofocus': True}))
+    password = forms.CharField(label="Contraseña", strip=False, widget=forms.PasswordInput)
 
 # ----------------- Cerrar Sesion -----------------
 @login_required
@@ -14,23 +17,21 @@ def signout(request):
 
 # # ----------------- Iniciar Sesion -----------------
 def signin(request):
-    
-    data = {"title": "Login",
-            "title1": "Inicio de Sesión"}
+    data = {"title": "Login", "title1": "Inicio de Sesión"}
     if request.method == "GET":
-        # Obtener mensajes de éxito de la cola de mensajes
         success_messages = messages.get_messages(request)
         return render(request, "security/auth/signin.html", {
-            "form": AuthenticationForm(),
-            "success_messages": success_messages,  # Pasar mensajes de éxito a la plantilla
+            "form": EmailAuthenticationForm(),
+            "success_messages": success_messages,
             **data
         })
     else:
-        form = AuthenticationForm(data=request.POST)
+        form = EmailAuthenticationForm(data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
+            # En Django, ModelBackend usa la kwarg que coincide con USERNAME_FIELD (email) o 'username' por compatibilidad
+            user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
                 return redirect("home")
@@ -43,6 +44,6 @@ def signin(request):
         else:
             return render(request, "security/auth/signin.html", {
                 "form": form,
-                 "error": "Datos invalidos",
+                "error": "Datos invalidos",
                 **data
             })
