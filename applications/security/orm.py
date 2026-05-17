@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import Group, Permission
+import os
 from django.contrib.contenttypes.models import ContentType
 from applications.security.models import GroupModulePermission, Menu, Module, User
 from applications.core.models import (
@@ -130,10 +131,10 @@ created_doctor_modules = Module.objects.bulk_create(modules_doctor)
 # ==================== CREAR USUARIOS Y GRUPOS ====================
 
 # Crear Usuarios
-user1 = User.objects.create(
+user1 = User.objects.create_user(
     username='drgomez2',
     email='drgomezz@clinica.med',
-    password='secure123!',
+    password=os.environ.get('SEED_USER1_PASSWORD', 'secure123!'),
     first_name='Carlos',
     last_name='Gómez',
     dni='0912345678',
@@ -142,10 +143,10 @@ user1 = User.objects.create(
     is_staff=True
 )
 
-user2 = User.objects.create(
+user2 = User.objects.create_user(
     username='asistente',
     email='asistente@clinica.med',
-    password='asist2025!',
+    password=os.environ.get('SEED_USER2_PASSWORD', 'asist2025!'),
     first_name='María',
     last_name='Sánchez',
     dni='0923456789',
