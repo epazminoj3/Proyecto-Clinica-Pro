@@ -1,0 +1,55 @@
+name: Integración Continua Django
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # Configuración de base de datos Postgres para el entorno de pruebas
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 123
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage  # Para generar el reporte de pruebas
+        
+    - name: Verificar el proyecto
+      run: |
+        python manage.py check
+        
+    - name: Ejecutar pruebas y generar reporte de cobertura
+      run: |
+        coverage run manage.py test
+        coverage report -m
+        coverage xml  # Genera un reporte en XML que puede ser guardado
+        
+    - name: Subir reporte de cobertura como artefacto
+      uses: actions/upload-artifact@v4
+      with:
+        name: reporte-cobertura
+        path: coverage.xml
