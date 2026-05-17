@@ -21,10 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ic81eu1==6a3row$0apcex_-1%ozqnxqzut3pj!@lk*e3x%zxc'
+# Read sensitive values from environment variables. Defaults below keep
+# development behavior but should be overridden in production.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-ic81eu1==6a3row$0apcex_-1%ozqnxqzut3pj!@lk*e3x%zxc'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Control DEBUG from environment. Set DJANGO_DEBUG='False' in production.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost']
 
@@ -102,11 +108,11 @@ WSGI_APPLICATION = 'proy_clinico.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '123',
-        'HOST': 'localhost',  # o la IP del servidor de base de datos
-        'PORT': '5432',        # puerto por defecto de PostgreSQL
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', '123'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),  # o la IP del servidor de base de datos
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),        # puerto por defecto de PostgreSQL
     }
 }
 # Password validation
@@ -163,8 +169,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CONFIGURACIÓN DEL CHATBOT IA CON GROQ
 # =============================================================================
 # Configuración de Groq (IA en la nube - ultrarrápida)
-GROQ_API_KEY = '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'
-GROQ_MODEL = 'llama3-8b-8192'  # Modelo optimizado para velocidad
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama3-8b-8192')  # Modelo por defecto
 
 # Logging para el chatbot
 LOGGING = {
@@ -194,14 +200,14 @@ LOGGING = {
 # CONFIGURACIÓN DE CORREO ELECTRÓNICO
 # =============================================================================
 # Configuración para envío real de correos con Gmail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'clinicpro0@gmail.com'  # Cambia por tu email de Gmail
-EMAIL_HOST_PASSWORD = 'rpuf llfr skfc iapq'  # Contraseña de aplicación de Gmail
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'clinicpro0@gmail.com')  # Cambia por tu email de Gmail
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'rpuf llfr skfc iapq')  # Contraseña de aplicación de Gmail
 
 # Para desarrollo (comentado - usa la consola):
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = 'Clinic Pro <clinicpro0@gmail.com>'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', f'Clinic Pro <{EMAIL_HOST_USER}>')
